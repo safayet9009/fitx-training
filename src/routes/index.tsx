@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Dumbbell, Flame, Sparkles, Trophy, ArrowRight, ShieldCheck } from "lucide-react";
+import { Footer } from "@/components/footer";
 
 export const Route = createFileRoute("/")({
   head: () => ({
