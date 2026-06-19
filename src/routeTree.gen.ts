@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkoutRouteImport } from './routes/workout'
+import { Route as SubscriptionRouteImport } from './routes/subscription'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RegisterGymRouteImport } from './routes/register-gym'
 import { Route as LoginRouteImport } from './routes/login'
@@ -23,6 +24,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const WorkoutRoute = WorkoutRouteImport.update({
   id: '/workout',
   path: '/workout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubscriptionRoute = SubscriptionRouteImport.update({
+  id: '/subscription',
+  path: '/subscription',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register-gym': typeof RegisterGymRoute
   '/signup': typeof SignupRoute
+  '/subscription': typeof SubscriptionRoute
   '/workout': typeof WorkoutRoute
 }
 export interface FileRoutesByTo {
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register-gym': typeof RegisterGymRoute
   '/signup': typeof SignupRoute
+  '/subscription': typeof SubscriptionRoute
   '/workout': typeof WorkoutRoute
 }
 export interface FileRoutesById {
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register-gym': typeof RegisterGymRoute
   '/signup': typeof SignupRoute
+  '/subscription': typeof SubscriptionRoute
   '/workout': typeof WorkoutRoute
 }
 export interface FileRouteTypes {
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register-gym'
     | '/signup'
+    | '/subscription'
     | '/workout'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register-gym'
     | '/signup'
+    | '/subscription'
     | '/workout'
   id:
     | '__root__'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register-gym'
     | '/signup'
+    | '/subscription'
     | '/workout'
   fileRoutesById: FileRoutesById
 }
@@ -157,6 +169,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RegisterGymRoute: typeof RegisterGymRoute
   SignupRoute: typeof SignupRoute
+  SubscriptionRoute: typeof SubscriptionRoute
   WorkoutRoute: typeof WorkoutRoute
 }
 
@@ -167,6 +180,13 @@ declare module '@tanstack/react-router' {
       path: '/workout'
       fullPath: '/workout'
       preLoaderRoute: typeof WorkoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscription': {
+      id: '/subscription'
+      path: '/subscription'
+      fullPath: '/subscription'
+      preLoaderRoute: typeof SubscriptionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -245,6 +265,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RegisterGymRoute: RegisterGymRoute,
   SignupRoute: SignupRoute,
+  SubscriptionRoute: SubscriptionRoute,
   WorkoutRoute: WorkoutRoute,
 }
 export const routeTree = rootRouteImport
