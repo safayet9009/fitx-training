@@ -1,8 +1,8 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useRouter } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import {
   LayoutDashboard, Dumbbell, Activity, Trophy, Sparkles, MapPin,
-  ClipboardList, CreditCard, User, Shield, Flame, Zap, Menu,
+  ClipboardList, CreditCard, User, Shield, Flame, Zap, Menu, ArrowLeft,
 } from "lucide-react";
 import { useState } from "react";
 import { useUser } from "@/lib/user-context";
@@ -47,11 +47,24 @@ function XPBar() {
 function StreakPill() {
   const { user } = useUser();
   return (
-    <div className="chip" style={{ background: "color-mix(in oklab, var(--neon-amber) 18%, transparent)" }}>
+    <Link
+      to="/profile"
+      className="chip transition-transform hover:scale-105 active:scale-95"
+      style={{ background: "color-mix(in oklab, var(--neon-amber) 18%, transparent)" }}
+      aria-label="View streak in profile"
+    >
       <Flame className="size-3.5" style={{ color: "var(--neon-amber)" }} />
       <span className="font-semibold">{user.streak}</span>
       <span className="text-muted-foreground">day streak</span>
-    </div>
+    </Link>
+  );
+}
+
+function XPBarLink() {
+  return (
+    <Link to="/profile" className="block transition-opacity hover:opacity-80" aria-label="View XP in profile">
+      <XPBar />
+    </Link>
   );
 }
 
@@ -73,6 +86,7 @@ function NavItem({ to, label, Icon, active, onClick }: { to: string; label: stri
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
   const { user, xpToNext, xpInLevel } = useUser();
@@ -144,9 +158,24 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Topbar */}
         <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-white/5 bg-background/60 px-4 py-3 backdrop-blur-xl lg:px-8">
+          {pathname !== "/home" && (
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined" && window.history.length > 1) {
+                  router.history.back();
+                } else {
+                  router.navigate({ to: "/home" });
+                }
+              }}
+              className="grid size-9 place-items-center rounded-lg border border-white/10 transition-all hover:bg-white/5 hover:scale-105 active:scale-95"
+              aria-label="Go back"
+            >
+              <ArrowLeft className="size-4" />
+            </button>
+          )}
           <button
             onClick={() => setOpen(true)}
-            className="lg:hidden grid size-9 place-items-center rounded-lg border border-white/10"
+            className="lg:hidden grid size-9 place-items-center rounded-lg border border-white/10 transition-all hover:bg-white/5"
             aria-label="Open menu"
           >
             <Menu className="size-4" />
@@ -157,7 +186,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
             <div className="hidden sm:block w-40 md:w-56">
-              <XPBar />
+              <XPBarLink />
             </div>
             <StreakPill />
           </div>
