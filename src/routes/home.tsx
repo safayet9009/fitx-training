@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Flame, Zap, Dumbbell, Activity, Sparkles, Trophy, Target, Play } from "lucide-react";
 import { PageHeader, StatCard, Progress, Badge, Button } from "@/components/ui-kit";
-import { currentUser, dailySummary, activities } from "@/lib/mock-data";
+import { activities } from "@/lib/mock-data";
+import { useUser } from "@/lib/user-context";
 
 export const Route = createFileRoute("/home")({
   head: () => ({ meta: [{ title: "Dashboard — FitX" }, { name: "description", content: "Your FitX dashboard." }] }),
@@ -9,11 +10,12 @@ export const Route = createFileRoute("/home")({
 });
 
 function Home() {
-  const pct = (currentUser.xp / currentUser.xpToNext) * 100;
+  const { user, level, xpInLevel, xpToNext } = useUser();
+  const pct = (xpInLevel / xpToNext) * 100;
   return (
     <div className="space-y-6">
       <PageHeader
-        title={`Hey ${currentUser.name.split(" ")[0]} 👋`}
+        title={`Hey ${user.name.split(" ")[0]} 👋`}
         subtitle="Here's your training game plan for today."
         action={
           <Link to="/workout"><Button><Play className="size-4" /> Start workout</Button></Link>
@@ -25,11 +27,11 @@ function Home() {
         <div className="glass glass-hover lg:col-span-2 p-6 animate-fade-up">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <div className="chip"><Zap className="size-3.5 neon-text-green" /> Level {currentUser.level}</div>
-              <h2 className="mt-3 text-2xl font-bold">{currentUser.xp.toLocaleString()} XP</h2>
-              <p className="text-sm text-muted-foreground">{currentUser.xpToNext - currentUser.xp} XP to Level {currentUser.level + 1}</p>
+              <div className="chip"><Zap className="size-3.5 neon-text-green" /> Level {level}</div>
+              <h2 className="mt-3 text-2xl font-bold">{user.xp.toLocaleString()} XP</h2>
+              <p className="text-sm text-muted-foreground">{xpToNext - xpInLevel} XP to Level {level + 1}</p>
             </div>
-            <Badge tone="green">+{dailySummary.xpEarnedToday} XP today</Badge>
+            <Badge tone="green">{user.totalWorkouts} workouts</Badge>
           </div>
           <div className="mt-5"><Progress value={pct} /></div>
 
@@ -62,22 +64,22 @@ function Home() {
             </div>
             <div>
               <div className="text-xs uppercase tracking-wider text-muted-foreground">Current streak</div>
-              <div className="text-3xl font-bold">{currentUser.streak} days</div>
+              <div className="text-3xl font-bold">{user.streak} days</div>
             </div>
           </div>
           <p className="mt-4 text-sm text-muted-foreground">Keep the fire alive — train today to extend your streak.</p>
           <div className="mt-4 flex items-center gap-2 text-xs">
             <Target className="size-3.5 neon-text-green" />
-            <span>Next goal: 30-day streak badge</span>
+            <span>Next goal: 7-day streak badge</span>
           </div>
         </div>
       </section>
 
-      {/* Daily summary */}
+      {/* Summary */}
       <section className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Calories burned" value={dailySummary.caloriesBurned} hint="Today" accent="red" icon={<Flame className="size-4" />} />
-        <StatCard label="Workouts completed" value={dailySummary.workoutsCompleted} hint="Today" accent="blue" icon={<Dumbbell className="size-4" />} />
-        <StatCard label="XP earned" value={`+${dailySummary.xpEarnedToday}`} hint="Today" accent="green" icon={<Trophy className="size-4" />} />
+        <StatCard label="Total workouts" value={user.totalWorkouts} accent="blue" icon={<Dumbbell className="size-4" />} />
+        <StatCard label="Running" value={`${user.runningKm} km`} accent="purple" icon={<Activity className="size-4" />} />
+        <StatCard label="Total XP" value={user.xp} accent="green" icon={<Trophy className="size-4" />} />
       </section>
 
       {/* Recent activity */}

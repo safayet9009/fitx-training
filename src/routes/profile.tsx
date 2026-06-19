@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Flame, Zap, Dumbbell, Activity, Award, Settings, Bell, LogOut } from "lucide-react";
 import { PageHeader, StatCard, Progress, Badge, Button } from "@/components/ui-kit";
-import { currentUser, badges, bmiInfo } from "@/lib/mock-data";
+import { useUser } from "@/lib/user-context";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Profile — FitX" }, { name: "description", content: "Your FitX athlete profile." }] }),
@@ -9,8 +9,8 @@ export const Route = createFileRoute("/profile")({
 });
 
 function ProfilePage() {
-  const pct = (currentUser.xp / currentUser.xpToNext) * 100;
-  const bmi = bmiInfo(currentUser.height, currentUser.weight);
+  const { user, level, xpInLevel, xpToNext, bmi, badges } = useUser();
+  const pct = (xpInLevel / xpToNext) * 100;
 
   return (
     <div className="space-y-6">
@@ -21,19 +21,19 @@ function ProfilePage() {
         <div className="grid gap-5 sm:grid-cols-[auto_minmax(0,1fr)_auto] items-center">
           <div className="grid size-20 place-items-center rounded-3xl font-display text-2xl font-bold text-background animate-badge-glow"
                style={{ background: "var(--gradient-primary)" }}>
-            {currentUser.avatar}
+            {user.avatar}
           </div>
           <div className="min-w-0">
-            <h2 className="truncate text-2xl font-bold">{currentUser.name}</h2>
-            <div className="text-sm text-muted-foreground">{currentUser.email}</div>
+            <h2 className="truncate text-2xl font-bold">{user.name}</h2>
+            <div className="text-sm text-muted-foreground">{user.email}</div>
             <div className="mt-2 flex flex-wrap gap-2">
-              <Badge tone="green"><Zap className="size-3.5" /> Lv {currentUser.level}</Badge>
-              <Badge tone="amber"><Flame className="size-3.5" /> {currentUser.streak}-day streak</Badge>
-              <Badge>{currentUser.goal}</Badge>
+              <Badge tone="green"><Zap className="size-3.5" /> Lv {level}</Badge>
+              <Badge tone="amber"><Flame className="size-3.5" /> {user.streak}-day streak</Badge>
+              <Badge>{user.goal}</Badge>
             </div>
           </div>
           <div className="w-full sm:w-56">
-            <div className="text-xs text-muted-foreground mb-2">{currentUser.xp}/{currentUser.xpToNext} XP</div>
+            <div className="text-xs text-muted-foreground mb-2">{xpInLevel}/{xpToNext} XP · {user.xp} total</div>
             <Progress value={pct} />
           </div>
         </div>
@@ -48,19 +48,19 @@ function ProfilePage() {
         </div>
         <div className="glass p-5 animate-fade-up">
           <div className="text-xs uppercase tracking-wider text-muted-foreground">Height</div>
-          <div className="mt-1 text-3xl font-bold">{currentUser.height} <span className="text-base text-muted-foreground">cm</span></div>
+          <div className="mt-1 text-3xl font-bold">{user.height} <span className="text-base text-muted-foreground">cm</span></div>
         </div>
         <div className="glass p-5 animate-fade-up">
           <div className="text-xs uppercase tracking-wider text-muted-foreground">Weight</div>
-          <div className="mt-1 text-3xl font-bold">{currentUser.weight} <span className="text-base text-muted-foreground">kg</span></div>
+          <div className="mt-1 text-3xl font-bold">{user.weight} <span className="text-base text-muted-foreground">kg</span></div>
         </div>
       </section>
 
       {/* Stats */}
       <section className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Total workouts" value="218" accent="blue" icon={<Dumbbell className="size-4" />} />
-        <StatCard label="Running distance" value="312 km" accent="purple" icon={<Activity className="size-4" />} />
-        <StatCard label="Calories burned" value="84.2k" accent="red" icon={<Flame className="size-4" />} />
+        <StatCard label="Total workouts" value={user.totalWorkouts} accent="blue" icon={<Dumbbell className="size-4" />} />
+        <StatCard label="Running distance" value={`${user.runningKm} km`} accent="purple" icon={<Activity className="size-4" />} />
+        <StatCard label="Total XP" value={user.xp} accent="green" icon={<Flame className="size-4" />} />
       </section>
 
       {/* Badges */}
@@ -82,10 +82,10 @@ function ProfilePage() {
       <section className="glass p-6 animate-fade-up flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="text-xs uppercase tracking-wider text-muted-foreground">Subscription</div>
-          <div className="mt-1 font-semibold">{currentUser.subscription.plan}</div>
-          <div className="text-xs text-muted-foreground">Renews {currentUser.subscription.renews}</div>
+          <div className="mt-1 font-semibold">{user.subscription.plan}</div>
+          <div className="text-xs text-muted-foreground">Renews {user.subscription.renews}</div>
         </div>
-        <Badge tone="green">{currentUser.subscription.status}</Badge>
+        <Badge tone="green">{user.subscription.status}</Badge>
       </section>
 
       {/* Settings */}

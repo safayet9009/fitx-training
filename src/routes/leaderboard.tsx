@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Crown, Medal, Zap } from "lucide-react";
 import { PageHeader, Tabs, Badge } from "@/components/ui-kit";
-import { leaderboard } from "@/lib/mock-data";
+import { leaderboard as baseLeaderboard } from "@/lib/mock-data";
+import { useUser } from "@/lib/user-context";
 
 export const Route = createFileRoute("/leaderboard")({
   head: () => ({ meta: [{ title: "Leaderboard — FitX" }, { name: "description", content: "XP rankings." }] }),
@@ -13,6 +14,16 @@ type Scope = "weekly" | "global";
 
 function LeaderboardPage() {
   const [scope, setScope] = useState<Scope>("weekly");
+  const { user, level } = useUser();
+
+  const leaderboard = useMemo(() => {
+    const merged = baseLeaderboard.map((u) =>
+      u.you ? { ...u, name: user.name, xp: user.xp, level } : u
+    );
+    merged.sort((a, b) => b.xp - a.xp);
+    return merged.map((u, i) => ({ ...u, rank: i + 1 }));
+  }, [user.name, user.xp, level]);
+
   const top3 = leaderboard.slice(0, 3);
   const rest = leaderboard.slice(3);
 
