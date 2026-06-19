@@ -13,6 +13,7 @@ import { Route as WorkoutRouteImport } from './routes/workout'
 import { Route as SubscriptionRouteImport } from './routes/subscription'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RegisterGymRouteImport } from './routes/register-gym'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as HomeRouteImport } from './routes/home'
@@ -39,6 +40,11 @@ const SignupRoute = SignupRouteImport.update({
 const RegisterGymRoute = RegisterGymRouteImport.update({
   id: '/register-gym',
   path: '/register-gym',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof HomeRoute
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/register-gym': typeof RegisterGymRoute
   '/signup': typeof SignupRoute
   '/subscription': typeof SubscriptionRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/home': typeof HomeRoute
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/register-gym': typeof RegisterGymRoute
   '/signup': typeof SignupRoute
   '/subscription': typeof SubscriptionRoute
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/home': typeof HomeRoute
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/register-gym': typeof RegisterGymRoute
   '/signup': typeof SignupRoute
   '/subscription': typeof SubscriptionRoute
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/leaderboard'
     | '/login'
+    | '/profile'
     | '/register-gym'
     | '/signup'
     | '/subscription'
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/leaderboard'
     | '/login'
+    | '/profile'
     | '/register-gym'
     | '/signup'
     | '/subscription'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/leaderboard'
     | '/login'
+    | '/profile'
     | '/register-gym'
     | '/signup'
     | '/subscription'
@@ -167,6 +179,7 @@ export interface RootRouteChildren {
   HomeRoute: typeof HomeRoute
   LeaderboardRoute: typeof LeaderboardRoute
   LoginRoute: typeof LoginRoute
+  ProfileRoute: typeof ProfileRoute
   RegisterGymRoute: typeof RegisterGymRoute
   SignupRoute: typeof SignupRoute
   SubscriptionRoute: typeof SubscriptionRoute
@@ -201,6 +214,13 @@ declare module '@tanstack/react-router' {
       path: '/register-gym'
       fullPath: '/register-gym'
       preLoaderRoute: typeof RegisterGymRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -263,6 +283,7 @@ const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
   LeaderboardRoute: LeaderboardRoute,
   LoginRoute: LoginRoute,
+  ProfileRoute: ProfileRoute,
   RegisterGymRoute: RegisterGymRoute,
   SignupRoute: SignupRoute,
   SubscriptionRoute: SubscriptionRoute,
