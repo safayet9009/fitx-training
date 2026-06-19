@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Dumbbell, MapPin, Home as HomeIcon, Play, Pause, Save, Timer, RotateCcw } from "lucide-react";
+import { Dumbbell, MapPin, Home as HomeIcon, Play, Pause, Save, Timer, RotateCcw, Check } from "lucide-react";
 import { PageHeader, Tabs, Button, Input, Field, Badge } from "@/components/ui-kit";
 import { gymExercises, homeExercises } from "@/lib/mock-data";
+import { useUser } from "@/lib/user-context";
 
 export const Route = createFileRoute("/workout")({
   head: () => ({ meta: [{ title: "Workout — FitX" }, { name: "description", content: "Log gym, running, or home workouts." }] }),
@@ -45,7 +46,12 @@ function ExerciseImage({ label }: { label: string }) {
   );
 }
 
+function todayKey() { return new Date().toISOString().slice(0, 10); }
+
 function GymTab() {
+  const { completeWorkout } = useUser();
+  const [saved, setSaved] = useState(false);
+  const actionId = `gym-${todayKey()}`;
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       {gymExercises.map((ex) => (
@@ -65,8 +71,14 @@ function GymTab() {
           </div>
         </div>
       ))}
-      <div className="lg:col-span-2 flex justify-end">
-        <Button><Save className="size-4" /> Save workout</Button>
+      <div className="lg:col-span-2 flex justify-end gap-3 items-center">
+        {saved && <Badge tone="green"><Check className="size-3.5" /> +40 XP added</Badge>}
+        <Button
+          onClick={() => { completeWorkout("gym", actionId); setSaved(true); }}
+          disabled={saved}
+        >
+          <Save className="size-4" /> {saved ? "Saved" : "Save workout"}
+        </Button>
       </div>
     </div>
   );
