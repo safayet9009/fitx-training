@@ -1,8 +1,8 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useRouter } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import {
   LayoutDashboard, Dumbbell, Activity, Trophy, Sparkles, MapPin,
-  ClipboardList, CreditCard, User, Shield, Flame, Zap, Menu,
+  ClipboardList, CreditCard, User, Shield, Flame, Zap, Menu, ArrowLeft,
 } from "lucide-react";
 import { useState } from "react";
 import { useUser } from "@/lib/user-context";
