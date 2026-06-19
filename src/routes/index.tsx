@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Dumbbell, Flame, Sparkles, Trophy, ArrowRight, ShieldCheck } from "lucide-react";
+import { Footer } from "@/components/footer";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,15 +39,15 @@ function Landing() {
       </header>
 
       <section className="mx-auto max-w-7xl px-6 pt-12 pb-20 text-center">
-        <span className="chip mx-auto"><Sparkles className="size-3.5 neon-text-green" /> AI Fitness OS · v1.0</span>
+        <span className="chip mx-auto"><Sparkles className="size-3.5 neon-text-green" /> Modern Fitness Platform · v1.0</span>
         <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-bold leading-tight sm:text-6xl">
-          Train like it's a game.<br />
+          Build healthy habits.<br />
           <span style={{ background: "var(--gradient-xp)", WebkitBackgroundClip: "text", color: "transparent" }}>
-            Level up your body.
+            Track every step.
           </span>
         </h1>
-        <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground">
-          FitX combines Strava-grade tracking, Duolingo-style streaks, and a smart AI coach — all in one premium fitness dashboard.
+        <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground">
+          FitX is a modern fitness tracking platform that helps users build healthy habits, track workouts, and monitor progress through structured activity and performance insights.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link to="/signup" className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-background"
@@ -76,6 +77,7 @@ function Landing() {
           ))}
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

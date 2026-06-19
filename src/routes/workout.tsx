@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Dumbbell, MapPin, Home as HomeIcon, Play, Pause, Save, Timer, RotateCcw } from "lucide-react";
+import { Dumbbell, MapPin, Home as HomeIcon, Play, Pause, Save, Timer, RotateCcw, Check } from "lucide-react";
 import { PageHeader, Tabs, Button, Input, Field, Badge } from "@/components/ui-kit";
 import { gymExercises, homeExercises } from "@/lib/mock-data";
+import { useUser } from "@/lib/user-context";
 
 export const Route = createFileRoute("/workout")({
   head: () => ({ meta: [{ title: "Workout — FitX" }, { name: "description", content: "Log gym, running, or home workouts." }] }),
@@ -45,7 +46,12 @@ function ExerciseImage({ label }: { label: string }) {
   );
 }
 
+function todayKey() { return new Date().toISOString().slice(0, 10); }
+
 function GymTab() {
+  const { completeWorkout } = useUser();
+  const [saved, setSaved] = useState(false);
+  const actionId = `gym-${todayKey()}`;
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       {gymExercises.map((ex) => (
@@ -65,8 +71,14 @@ function GymTab() {
           </div>
         </div>
       ))}
-      <div className="lg:col-span-2 flex justify-end">
-        <Button><Save className="size-4" /> Save workout</Button>
+      <div className="lg:col-span-2 flex justify-end gap-3 items-center">
+        {saved && <Badge tone="green"><Check className="size-3.5" /> +40 XP added</Badge>}
+        <Button
+          onClick={() => { completeWorkout("gym", actionId); setSaved(true); }}
+          disabled={saved}
+        >
+          <Save className="size-4" /> {saved ? "Saved" : "Save workout"}
+        </Button>
       </div>
     </div>
   );
@@ -85,6 +97,10 @@ function RunTab() {
   }, [running]);
 
   const fmt = (s: number) => `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+  const { completeWorkout } = useUser();
+  const [km, setKm] = useState(5);
+  const [saved, setSaved] = useState(false);
+  const actionId = `run-${todayKey()}`;
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
@@ -103,9 +119,18 @@ function RunTab() {
         </div>
       </div>
       <div className="glass p-6 space-y-4 animate-fade-up">
-        <Field label="Distance (km)"><Input type="number" placeholder="5.0" defaultValue="5.0" step="0.1" /></Field>
-        <Field label="Time (minutes)"><Input type="number" placeholder="32" defaultValue={Math.max(1, Math.round(seconds/60))} /></Field>
-        <Button className="w-full"><Save className="size-4" /> Save run</Button>
+        <Field label="Distance (km)">
+          <Input type="number" value={km} step="0.1" onChange={(e) => setKm(Number(e.target.value) || 0)} />
+        </Field>
+        <Field label="Time (minutes)"><Input type="number" defaultValue={Math.max(1, Math.round(seconds/60))} /></Field>
+        {saved && <Badge tone="green"><Check className="size-3.5" /> +30 XP added</Badge>}
+        <Button
+          className="w-full"
+          disabled={saved}
+          onClick={() => { setRunning(false); completeWorkout("run", actionId, { km }); setSaved(true); }}
+        >
+          <Save className="size-4" /> {saved ? "Saved" : "Save run"}
+        </Button>
       </div>
     </div>
   );
@@ -114,6 +139,8 @@ function RunTab() {
 function HomeTab() {
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const [remaining, setRemaining] = useState(0);
+  const { completeWorkout } = useUser();
+  const [done, setDone] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (activeIdx === null) return;
@@ -124,26 +151,38 @@ function HomeTab() {
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      {homeExercises.map((ex, i) => (
-        <div key={ex.id} className="glass glass-hover p-5 animate-fade-up">
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
-            <div className="min-w-0">
-              <h3 className="truncate text-lg font-semibold">{ex.name}</h3>
-              <div className="mt-1 text-xs text-muted-foreground">{ex.rounds} rounds · {ex.duration}s work / {ex.rest}s rest</div>
+      {homeExercises.map((ex, i) => {
+        const actionId = `home-${ex.id}-${todayKey()}`;
+        const isDone = !!done[actionId];
+        return (
+          <div key={ex.id} className="glass glass-hover p-5 animate-fade-up">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+              <div className="min-w-0">
+                <h3 className="truncate text-lg font-semibold">{ex.name}</h3>
+                <div className="mt-1 text-xs text-muted-foreground">{ex.rounds} rounds · {ex.duration}s work / {ex.rest}s rest</div>
+              </div>
+              <Badge tone="amber"><Timer className="size-3.5" /> {activeIdx === i ? remaining : ex.duration}s</Badge>
             </div>
-            <Badge tone="amber"><Timer className="size-3.5" /> {activeIdx === i ? remaining : ex.duration}s</Badge>
+            <div className="mt-4"><ExerciseImage label={ex.name} /></div>
+            <div className="mt-4 flex gap-2 items-center">
+              <Button onClick={() => { setActiveIdx(i); setRemaining(ex.duration); }}>
+                <Play className="size-4" /> Start
+              </Button>
+              <Button
+                variant="secondary"
+                disabled={isDone}
+                onClick={() => {
+                  setActiveIdx(null); setRemaining(0);
+                  completeWorkout("home", actionId);
+                  setDone((d) => ({ ...d, [actionId]: true }));
+                }}
+              >
+                {isDone ? <><Check className="size-4" /> Done +20 XP</> : "Complete"}
+              </Button>
+            </div>
           </div>
-          <div className="mt-4"><ExerciseImage label={ex.name} /></div>
-          <div className="mt-4 flex gap-2">
-            <Button onClick={() => { setActiveIdx(i); setRemaining(ex.duration); }}>
-              <Play className="size-4" /> Start
-            </Button>
-            <Button variant="secondary" onClick={() => { setActiveIdx(null); setRemaining(0); }}>
-              Complete
-            </Button>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppShell } from "../components/app-shell";
+import { UserProvider } from "../lib/user-context";
 
 function NotFoundComponent() {
   return (
@@ -83,9 +84,11 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <AppShell>
-        <Outlet />
-      </AppShell>
+      <UserProvider>
+        <AppShell>
+          <Outlet />
+        </AppShell>
+      </UserProvider>
     </QueryClientProvider>
   );
 }
