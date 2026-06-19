@@ -5,7 +5,8 @@ import {
   ClipboardList, CreditCard, User, Shield, Flame, Zap, Menu,
 } from "lucide-react";
 import { useState } from "react";
-import { currentUser } from "@/lib/mock-data";
+import { useUser } from "@/lib/user-context";
+import { Footer } from "@/components/footer";
 
 const nav = [
   { to: "/home", label: "Dashboard", icon: LayoutDashboard },
@@ -21,15 +22,17 @@ const nav = [
 ] as const;
 
 function XPBar() {
-  const pct = Math.min(100, (currentUser.xp / currentUser.xpToNext) * 100);
+  const { user, level, xpInLevel, xpToNext } = useUser();
+  void user;
+  const pct = Math.min(100, (xpInLevel / xpToNext) * 100);
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between text-xs">
         <span className="flex items-center gap-1.5 font-medium">
           <Zap className="size-3.5 neon-text-green" />
-          Lv {currentUser.level}
+          Lv {level}
         </span>
-        <span className="text-muted-foreground">{currentUser.xp}/{currentUser.xpToNext} XP</span>
+        <span className="text-muted-foreground">{xpInLevel}/{xpToNext} XP</span>
       </div>
       <div className="h-2 rounded-full bg-white/5 overflow-hidden">
         <div
@@ -42,10 +45,11 @@ function XPBar() {
 }
 
 function StreakPill() {
+  const { user } = useUser();
   return (
     <div className="chip" style={{ background: "color-mix(in oklab, var(--neon-amber) 18%, transparent)" }}>
       <Flame className="size-3.5" style={{ color: "var(--neon-amber)" }} />
-      <span className="font-semibold">{currentUser.streak}</span>
+      <span className="font-semibold">{user.streak}</span>
       <span className="text-muted-foreground">day streak</span>
     </div>
   );
@@ -71,11 +75,12 @@ function NavItem({ to, label, Icon, active, onClick }: { to: string; label: stri
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const { user, xpToNext, xpInLevel } = useUser();
   const isAuth = pathname === "/login" || pathname === "/signup" || pathname === "/";
   if (isAuth) return <>{children}</>;
 
   const SideContent = (
-    <div className="flex h-full flex-col gap-6 p-4">
+    <div className="flex h-full flex-col gap-6 p-4 overflow-y-auto">
       <Link to="/home" className="flex items-center gap-2 px-2">
         <div className="grid size-9 place-items-center rounded-xl" style={{ background: "var(--gradient-primary)" }}>
           <Dumbbell className="size-5 text-background" />
@@ -103,17 +108,17 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="flex items-center gap-3">
           <div className="grid size-10 place-items-center rounded-full text-sm font-bold"
                style={{ background: "var(--gradient-primary)", color: "var(--background)" }}>
-            {currentUser.avatar}
+            {user.avatar}
           </div>
           <div className="min-w-0">
-            <div className="truncate text-sm font-semibold">{currentUser.name}</div>
-            <div className="truncate text-xs text-muted-foreground">{currentUser.goal}</div>
+            <div className="truncate text-sm font-semibold">{user.name}</div>
+            <div className="truncate text-xs text-muted-foreground">{user.goal}</div>
           </div>
         </div>
         <XPBar />
         <StreakPill />
         <div className="text-[11px] text-muted-foreground">
-          Next goal: <span className="text-foreground">Hit Lv 15</span> · {currentUser.xpToNext - currentUser.xp} XP to go
+          {xpToNext - xpInLevel} XP to next level
         </div>
       </div>
     </div>
@@ -130,13 +135,13 @@ export function AppShell({ children }: { children: ReactNode }) {
       {open && (
         <>
           <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setOpen(false)} />
-          <aside className="fixed inset-y-0 left-0 z-50 w-72 lg:hidden glass !rounded-none animate-fade-up">
+          <aside className="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] lg:hidden glass !rounded-none animate-fade-up overflow-y-auto">
             {SideContent}
           </aside>
         </>
       )}
 
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 flex flex-col">
         {/* Topbar */}
         <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-white/5 bg-background/60 px-4 py-3 backdrop-blur-xl lg:px-8">
           <button
@@ -148,7 +153,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </button>
           <div className="hidden sm:block min-w-0">
             <div className="text-xs text-muted-foreground">Welcome back</div>
-            <div className="truncate font-semibold">{currentUser.name}</div>
+            <div className="truncate font-semibold">{user.name}</div>
           </div>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
             <div className="hidden sm:block w-40 md:w-56">
@@ -158,7 +163,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="px-4 py-6 lg:px-8 lg:py-8">{children}</main>
+        <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8">{children}</main>
+        <Footer />
       </div>
     </div>
   );
