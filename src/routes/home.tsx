@@ -25,39 +25,47 @@ function Home() {
       {/* Hero status */}
       <section className="grid gap-4 lg:grid-cols-3">
         <div className="glass glass-hover lg:col-span-2 p-6 animate-fade-up">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <div className="chip"><Zap className="size-3.5 neon-text-green" /> Level {level}</div>
-              <h2 className="mt-3 text-2xl font-bold">{user.xp.toLocaleString()} XP</h2>
-              <p className="text-sm text-muted-foreground">{xpToNext - xpInLevel} XP to Level {level + 1}</p>
+          <Link to="/profile" className="block transition-transform hover:scale-[1.01] active:scale-[0.99]" aria-label="View XP details in profile">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <div className="chip"><Zap className="size-3.5 neon-text-green" /> Level {level}</div>
+                <h2 className="mt-3 text-2xl font-bold">{user.xp.toLocaleString()} XP</h2>
+                <p className="text-sm text-muted-foreground">{xpToNext - xpInLevel} XP to Level {level + 1}</p>
+              </div>
+              <Badge tone="green">{user.totalWorkouts} workouts</Badge>
             </div>
-            <Badge tone="green">{user.totalWorkouts} workouts</Badge>
-          </div>
-          <div className="mt-5"><Progress value={pct} /></div>
+            <div className="mt-5"><Progress value={pct} /></div>
+          </Link>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <Link to="/workout" className="glass glass-hover flex items-center gap-3 p-4">
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Link to="/workout" className="glass glass-hover flex items-center gap-3 p-4 transition-transform hover:scale-[1.02] active:scale-[0.98]">
               <div className="grid size-10 place-items-center rounded-xl" style={{ background: "color-mix(in oklab, var(--neon-green) 18%, transparent)", color: "var(--neon-green)" }}>
                 <Dumbbell className="size-5" />
               </div>
               <div><div className="text-sm font-semibold">Start Workout</div><div className="text-xs text-muted-foreground">Gym · Run · Home</div></div>
             </Link>
-            <Link to="/activities" className="glass glass-hover flex items-center gap-3 p-4">
+            <Link to="/activities" className="glass glass-hover flex items-center gap-3 p-4 transition-transform hover:scale-[1.02] active:scale-[0.98]">
               <div className="grid size-10 place-items-center rounded-xl" style={{ background: "color-mix(in oklab, var(--neon-blue) 18%, transparent)", color: "var(--neon-blue)" }}>
                 <Activity className="size-5" />
               </div>
               <div><div className="text-sm font-semibold">View Activity</div><div className="text-xs text-muted-foreground">Your feed</div></div>
             </Link>
-            <Link to="/ai-coach" className="glass glass-hover flex items-center gap-3 p-4">
+            <Link to="/ai-coach" className="glass glass-hover flex items-center gap-3 p-4 transition-transform hover:scale-[1.02] active:scale-[0.98]">
               <div className="grid size-10 place-items-center rounded-xl" style={{ background: "color-mix(in oklab, var(--neon-purple) 22%, transparent)", color: "var(--neon-purple)" }}>
                 <Sparkles className="size-5" />
               </div>
               <div><div className="text-sm font-semibold">AI Coach</div><div className="text-xs text-muted-foreground">Today's plan</div></div>
             </Link>
+            <Link to="/centers" className="glass glass-hover flex items-center gap-3 p-4 transition-transform hover:scale-[1.02] active:scale-[0.98]">
+              <div className="grid size-10 place-items-center rounded-xl" style={{ background: "color-mix(in oklab, var(--neon-amber) 20%, transparent)", color: "var(--neon-amber)" }}>
+                <Building2 className="size-5" />
+              </div>
+              <div><div className="text-sm font-semibold">Gym SaaS</div><div className="text-xs text-muted-foreground">Find centers</div></div>
+            </Link>
           </div>
         </div>
 
-        <div className="glass glass-hover p-6 animate-fade-up" style={{ background: "color-mix(in oklab, var(--neon-amber) 14%, transparent)" }}>
+        <Link to="/profile" className="glass glass-hover p-6 animate-fade-up block transition-transform hover:scale-[1.01] active:scale-[0.99]" style={{ background: "color-mix(in oklab, var(--neon-amber) 14%, transparent)" }} aria-label="View streak in profile">
           <div className="flex items-center gap-3">
             <div className="grid size-12 place-items-center rounded-2xl animate-badge-glow" style={{ background: "var(--gradient-streak)", color: "var(--background)" }}>
               <Flame className="size-6" />
@@ -72,14 +80,20 @@ function Home() {
             <Target className="size-3.5 neon-text-green" />
             <span>Next goal: 7-day streak badge</span>
           </div>
-        </div>
+        </Link>
       </section>
 
       {/* Summary */}
       <section className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Total workouts" value={user.totalWorkouts} accent="blue" icon={<Dumbbell className="size-4" />} />
-        <StatCard label="Running" value={`${user.runningKm} km`} accent="purple" icon={<Activity className="size-4" />} />
-        <StatCard label="Total XP" value={user.xp} accent="green" icon={<Trophy className="size-4" />} />
+        <Link to="/profile" className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
+          <StatCard label="Total workouts" value={user.totalWorkouts} accent="blue" icon={<Dumbbell className="size-4" />} />
+        </Link>
+        <Link to="/activities" className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
+          <StatCard label="Running" value={`${user.runningKm} km`} accent="purple" icon={<Activity className="size-4" />} />
+        </Link>
+        <Link to="/profile" className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
+          <StatCard label="Total XP" value={user.xp} accent="green" icon={<Trophy className="size-4" />} />
+        </Link>
       </section>
 
       {/* Recent activity */}
