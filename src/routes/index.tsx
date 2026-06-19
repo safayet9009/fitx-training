@@ -77,6 +77,7 @@ function Landing() {
           ))}
         </div>
       </section>
+      <Footer />
     </div>
   );
 }
