@@ -47,11 +47,24 @@ function XPBar() {
 function StreakPill() {
   const { user } = useUser();
   return (
-    <div className="chip" style={{ background: "color-mix(in oklab, var(--neon-amber) 18%, transparent)" }}>
+    <Link
+      to="/profile"
+      className="chip transition-transform hover:scale-105 active:scale-95"
+      style={{ background: "color-mix(in oklab, var(--neon-amber) 18%, transparent)" }}
+      aria-label="View streak in profile"
+    >
       <Flame className="size-3.5" style={{ color: "var(--neon-amber)" }} />
       <span className="font-semibold">{user.streak}</span>
       <span className="text-muted-foreground">day streak</span>
-    </div>
+    </Link>
+  );
+}
+
+function XPBarLink() {
+  return (
+    <Link to="/profile" className="block transition-opacity hover:opacity-80" aria-label="View XP in profile">
+      <XPBar />
+    </Link>
   );
 }
 
