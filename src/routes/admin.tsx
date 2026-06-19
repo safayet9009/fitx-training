@@ -16,7 +16,7 @@ function AdminPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Admin Console"
-        subtitle={<span className="flex items-center gap-2"><Shield className="size-4 neon-text-green" /> Restricted to staff</span> as any} />
+        subtitle={<span className="inline-flex items-center gap-2"><Shield className="size-4 neon-text-green" /> Restricted to staff</span>} />
       <Tabs<Tab>
         tabs={[
           { id: "analytics", label: "Analytics", icon: <BarChart3 className="size-4" /> },
