@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkoutRouteImport } from './routes/workout'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as RegisterGymRouteImport } from './routes/register-gym'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as HomeRouteImport } from './routes/home'
@@ -27,6 +28,11 @@ const WorkoutRoute = WorkoutRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterGymRoute = RegisterGymRouteImport.update({
+  id: '/register-gym',
+  path: '/register-gym',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof HomeRoute
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
+  '/register-gym': typeof RegisterGymRoute
   '/signup': typeof SignupRoute
   '/workout': typeof WorkoutRoute
 }
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/home': typeof HomeRoute
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
+  '/register-gym': typeof RegisterGymRoute
   '/signup': typeof SignupRoute
   '/workout': typeof WorkoutRoute
 }
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/home': typeof HomeRoute
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
+  '/register-gym': typeof RegisterGymRoute
   '/signup': typeof SignupRoute
   '/workout': typeof WorkoutRoute
 }
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/leaderboard'
     | '/login'
+    | '/register-gym'
     | '/signup'
     | '/workout'
   fileRoutesByTo: FileRoutesByTo
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/leaderboard'
     | '/login'
+    | '/register-gym'
     | '/signup'
     | '/workout'
   id:
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/leaderboard'
     | '/login'
+    | '/register-gym'
     | '/signup'
     | '/workout'
   fileRoutesById: FileRoutesById
@@ -143,6 +155,7 @@ export interface RootRouteChildren {
   HomeRoute: typeof HomeRoute
   LeaderboardRoute: typeof LeaderboardRoute
   LoginRoute: typeof LoginRoute
+  RegisterGymRoute: typeof RegisterGymRoute
   SignupRoute: typeof SignupRoute
   WorkoutRoute: typeof WorkoutRoute
 }
@@ -161,6 +174,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register-gym': {
+      id: '/register-gym'
+      path: '/register-gym'
+      fullPath: '/register-gym'
+      preLoaderRoute: typeof RegisterGymRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -223,6 +243,7 @@ const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
   LeaderboardRoute: LeaderboardRoute,
   LoginRoute: LoginRoute,
+  RegisterGymRoute: RegisterGymRoute,
   SignupRoute: SignupRoute,
   WorkoutRoute: WorkoutRoute,
 }
