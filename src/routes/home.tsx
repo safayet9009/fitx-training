@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Flame, Zap, Dumbbell, Activity, Sparkles, Trophy, Target, Play } from "lucide-react";
+import { Flame, Zap, Dumbbell, Activity, Sparkles, Trophy, Target, Play, Building2 } from "lucide-react";
 import { PageHeader, StatCard, Progress, Badge, Button } from "@/components/ui-kit";
 import { activities } from "@/lib/mock-data";
 import { useUser } from "@/lib/user-context";
