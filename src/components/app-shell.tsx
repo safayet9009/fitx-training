@@ -86,6 +86,7 @@ function NavItem({ to, label, Icon, active, onClick }: { to: string; label: stri
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
   const { user, xpToNext, xpInLevel } = useUser();
