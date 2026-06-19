@@ -158,9 +158,24 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Topbar */}
         <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-white/5 bg-background/60 px-4 py-3 backdrop-blur-xl lg:px-8">
+          {pathname !== "/home" && (
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined" && window.history.length > 1) {
+                  router.history.back();
+                } else {
+                  router.navigate({ to: "/home" });
+                }
+              }}
+              className="grid size-9 place-items-center rounded-lg border border-white/10 transition-all hover:bg-white/5 hover:scale-105 active:scale-95"
+              aria-label="Go back"
+            >
+              <ArrowLeft className="size-4" />
+            </button>
+          )}
           <button
             onClick={() => setOpen(true)}
-            className="lg:hidden grid size-9 place-items-center rounded-lg border border-white/10"
+            className="lg:hidden grid size-9 place-items-center rounded-lg border border-white/10 transition-all hover:bg-white/5"
             aria-label="Open menu"
           >
             <Menu className="size-4" />
@@ -171,7 +186,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
             <div className="hidden sm:block w-40 md:w-56">
-              <XPBar />
+              <XPBarLink />
             </div>
             <StreakPill />
           </div>
