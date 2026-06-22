@@ -37,11 +37,15 @@ export const subscriptionService = {
   },
   async listAll() {
     const { data, error } = await supabase
-      .from("subscriptions")
-      .select("*, profiles(name,email)")
+      .from("subscriptions").select("*")
       .order("created_at", { ascending: false });
     if (error) throw error;
-    return data ?? [];
+    const rows = (data ?? []) as any[];
+    const userIds = [...new Set(rows.map((r) => r.user_id))];
+    if (userIds.length === 0) return rows;
+    const { data: profs } = await supabase.from("profiles").select("id,name,email").in("id", userIds);
+    const map = new Map((profs ?? []).map((p) => [p.id, p]));
+    return rows.map((r) => ({ ...r, profiles: map.get(r.user_id) ?? null }));
   },
   async decide(id: string, status: "active" | "rejected") {
     const { error } = await supabase.from("subscriptions").update({ status }).eq("id", id);
