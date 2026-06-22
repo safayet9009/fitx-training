@@ -1,105 +1,103 @@
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import type { Session } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { profileService, type Profile } from "@/services/profileService";
+import { authService } from "@/services/authService";
 import { bmiInfo } from "@/lib/mock-data";
 
-export type WorkoutType = "gym" | "run" | "home";
-
-const XP_REWARD: Record<WorkoutType, number> = { gym: 40, run: 30, home: 20 };
 const XP_PER_LEVEL = 100;
 
-export type UserState = {
-  name: string;
-  email: string;
-  avatar: string;
-  goal: string;
-  role: "admin" | "user";
-  height: number;
-  weight: number;
-  xp: number;
-  streak: number;
-  totalWorkouts: number;
-  runningKm: number;
-  lastActiveDate: string | null;
-  subscription: { plan: string; status: string; renews: string; trialDays: number };
-};
-
-const initialUser: UserState = {
-  name: "Arjun Rahman",
-  email: "arjun@fitx.app",
-  avatar: "AR",
-  goal: "Build lean muscle",
-  role: "admin",
-  height: 178,
-  weight: 73,
-  xp: 320,
-  streak: 6,
-  totalWorkouts: 12,
-  runningKm: 18,
-  lastActiveDate: "2026-06-18",
-  subscription: { plan: "Pro Monthly", status: "active", renews: "Jul 19, 2026", trialDays: 4 },
-};
-
-type DerivedBadge = { id: string; name: string; icon: string; desc: string; unlocked: boolean };
+type BadgeRow = { code: string; name: string; icon: string; description: string; requirement_type: string; requirement_value: number };
+type DerivedBadge = BadgeRow & { unlocked: boolean };
 
 type Ctx = {
-  user: UserState;
+  loading: boolean;
+  session: Session | null;
+  profile: Profile | null;
+  isAdmin: boolean;
+  badges: DerivedBadge[];
+  bmi: ReturnType<typeof bmiInfo>;
   level: number;
   xpInLevel: number;
   xpToNext: number;
-  bmi: ReturnType<typeof bmiInfo>;
-  badges: DerivedBadge[];
-  completeWorkout: (type: WorkoutType, actionId: string, extra?: { km?: number }) => void;
+  refreshProfile: () => Promise<void>;
+  signOut: () => Promise<void>;
 };
 
 const UserContext = createContext<Ctx | null>(null);
 
-function todayISO() {
-  return new Date().toISOString().slice(0, 10);
-}
-function daysBetween(a: string, b: string) {
-  const da = Date.parse(a + "T00:00:00Z");
-  const db = Date.parse(b + "T00:00:00Z");
-  return Math.round((db - da) / 86400000);
-}
-
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<UserState>(initialUser);
-  const completedRef = useRef<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [allBadges, setAllBadges] = useState<BadgeRow[]>([]);
+  const [unlockedCodes, setUnlockedCodes] = useState<Set<string>>(new Set());
 
-  const completeWorkout = useCallback((type: WorkoutType, actionId: string, extra?: { km?: number }) => {
-    if (completedRef.current.has(actionId)) return;
-    completedRef.current.add(actionId);
-    const today = todayISO();
-    setUser((u) => {
-      let streak = u.streak;
-      if (u.lastActiveDate !== today) {
-        const diff = u.lastActiveDate ? daysBetween(u.lastActiveDate, today) : 99;
-        streak = diff === 1 ? u.streak + 1 : 1;
-      }
-      return {
-        ...u,
-        xp: u.xp + XP_REWARD[type],
-        streak,
-        lastActiveDate: today,
-        totalWorkouts: u.totalWorkouts + 1,
-        runningKm: type === "run" ? u.runningKm + (extra?.km ?? 0) : u.runningKm,
-      };
-    });
+  const loadFor = useCallback(async (uid: string) => {
+    const [p, admin, all, mine] = await Promise.all([
+      profileService.getById(uid),
+      profileService.isAdmin(uid),
+      profileService.getAllBadges(),
+      profileService.getUserBadges(uid),
+    ]);
+    setProfile(p);
+    setIsAdmin(admin);
+    setAllBadges((all ?? []) as BadgeRow[]);
+    setUnlockedCodes(new Set((mine as any[]).map((r) => r.badges?.code).filter(Boolean)));
   }, []);
 
-  const derived = useMemo<Ctx>(() => {
-    const level = Math.floor(user.xp / XP_PER_LEVEL) + 1;
-    const xpInLevel = user.xp % XP_PER_LEVEL;
-    const bmi = bmiInfo(user.height, user.weight);
-    const badges: DerivedBadge[] = [
-      { id: "bronze", name: "Bronze",  icon: "🥉", desc: "Earn 100 XP",      unlocked: user.xp >= 100 },
-      { id: "silver", name: "Silver",  icon: "🥈", desc: "Earn 300 XP",      unlocked: user.xp >= 300 },
-      { id: "gold",   name: "Gold",    icon: "🥇", desc: "Earn 600 XP",      unlocked: user.xp >= 600 },
-      { id: "fire",   name: "On Fire", icon: "🔥", desc: "7-day streak",     unlocked: user.streak >= 7 },
-    ];
-    return { user, level, xpInLevel, xpToNext: XP_PER_LEVEL, bmi, badges, completeWorkout };
-  }, [user, completeWorkout]);
+  const refreshProfile = useCallback(async () => {
+    if (!session?.user) return;
+    await loadFor(session.user.id);
+  }, [session?.user, loadFor]);
 
-  return <UserContext.Provider value={derived}>{children}</UserContext.Provider>;
+  useEffect(() => {
+    // Set up listener FIRST, then check existing session
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+      setSession(s);
+      if (s?.user) {
+        // defer to avoid deadlocks
+        setTimeout(() => { loadFor(s.user.id); }, 0);
+      } else {
+        setProfile(null);
+        setIsAdmin(false);
+        setUnlockedCodes(new Set());
+      }
+    });
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      if (data.session?.user) {
+        loadFor(data.session.user.id).finally(() => setLoading(false));
+      } else {
+        setLoading(false);
+      }
+    });
+    return () => { sub.subscription.unsubscribe(); };
+  }, [loadFor]);
+
+  const value = useMemo<Ctx>(() => {
+    const xp = profile?.xp ?? 0;
+    const level = Math.floor(xp / XP_PER_LEVEL) + 1;
+    const xpInLevel = xp % XP_PER_LEVEL;
+    const bmi = bmiInfo(profile?.height_cm ?? 0, profile?.weight_kg ?? 0);
+    const badges: DerivedBadge[] = allBadges.map((b) => ({ ...b, unlocked: unlockedCodes.has(b.code) }));
+    return {
+      loading,
+      session,
+      profile,
+      isAdmin,
+      badges,
+      bmi,
+      level,
+      xpInLevel,
+      xpToNext: XP_PER_LEVEL,
+      refreshProfile,
+      signOut: authService.signOut,
+    };
+  }, [loading, session, profile, isAdmin, allBadges, unlockedCodes, refreshProfile]);
+
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 }
 
 export function useUser() {

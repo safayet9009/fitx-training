@@ -2,31 +2,42 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Check, Sparkles } from "lucide-react";
 import { PageHeader, Button, Field, Input, Badge } from "@/components/ui-kit";
-import { currentUser } from "@/lib/mock-data";
+import { useUser } from "@/lib/user-context";
+import { subscriptionService, type PaymentMethod, type SubscriptionPlan } from "@/services/subscriptionService";
 
 export const Route = createFileRoute("/subscription")({
-  head: () => ({ meta: [{ title: "Subscription — FitX" }, { name: "description", content: "Upgrade your FitX plan." }] }),
+  head: () => ({ meta: [{ title: "Subscription — FitX" }] }),
   component: SubscriptionPage,
 });
 
-const plans = [
-  { id: "monthly", name: "Monthly", price: 990, per: "/mo", popular: false, features: ["Unlimited workouts", "AI coach", "Streak rewards"] },
-  { id: "3month", name: "3 Months", price: 2490, per: "/3mo", popular: true, features: ["Everything in Monthly", "Save 16%", "Priority support"] },
-  { id: "yearly", name: "Yearly", price: 8990, per: "/yr", popular: false, features: ["Everything in 3 Month", "Save 24%", "Exclusive badges"] },
+const plans: { id: SubscriptionPlan; name: string; price: number; per: string; popular: boolean; features: string[] }[] = [
+  { id: "monthly",   name: "Monthly",  price: 990,  per: "/mo",  popular: false, features: ["Unlimited workouts", "AI coach", "Streak rewards"] },
+  { id: "quarterly", name: "3 Months", price: 2490, per: "/3mo", popular: true,  features: ["Everything in Monthly", "Save 16%", "Priority support"] },
+  { id: "yearly",    name: "Yearly",   price: 8990, per: "/yr",  popular: false, features: ["Everything in 3 Month", "Save 24%", "Exclusive badges"] },
 ];
 
-const methods = [
+const methods: { id: PaymentMethod; name: string; c: string }[] = [
   { id: "bkash",  name: "bKash",  c: "#E2136E" },
   { id: "nagad",  name: "Nagad",  c: "#F58220" },
   { id: "rocket", name: "Rocket", c: "#8C3494" },
 ];
 
 function SubscriptionPage() {
-  const [selectedPlan, setSelectedPlan] = useState("3month");
-  const [method, setMethod] = useState<string | null>(null);
+  const { profile } = useUser();
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>("quarterly");
+  const [method, setMethod] = useState<PaymentMethod | null>(null);
+  const [txn, setTxn] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
+  const [mine, setMine] = useState<any[]>([]);
 
-  // Trial countdown
-  const [trial, setTrial] = useState({ d: currentUser.subscription.trialDays, h: 11, m: 23, s: 47 });
+  useEffect(() => {
+    if (!profile?.id) return;
+    subscriptionService.myActive(profile.id).then(setMine);
+  }, [profile?.id, done]);
+
+  // Trial countdown (visual only)
+  const [trial, setTrial] = useState({ d: 6, h: 11, m: 23, s: 47 });
   useEffect(() => {
     const t = setInterval(() => setTrial((p) => {
       let { d, h, m, s } = p;
@@ -36,6 +47,18 @@ function SubscriptionPage() {
     }), 1000);
     return () => clearInterval(t);
   }, []);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!profile || !method) return;
+    setBusy(true);
+    try {
+      await subscriptionService.submit({
+        user_id: profile.id, plan: selectedPlan, payment_method: method, transaction_id: txn,
+      });
+      setDone(true); setTxn(""); setMethod(null);
+    } finally { setBusy(false); }
+  }
 
   return (
     <div className="space-y-6">
@@ -49,7 +72,7 @@ function SubscriptionPage() {
             {String(trial.d).padStart(2,"0")}d {String(trial.h).padStart(2,"0")}h {String(trial.m).padStart(2,"0")}m {String(trial.s).padStart(2,"0")}s
           </div>
         </div>
-        <Badge tone="amber">Pro Trial</Badge>
+        <Badge tone="amber">{profile?.subscription_type ?? "free"}</Badge>
       </section>
 
       <section className="grid gap-4 sm:grid-cols-3">
@@ -57,14 +80,8 @@ function SubscriptionPage() {
           const selected = selectedPlan === p.id;
           return (
             <button key={p.id} onClick={() => setSelectedPlan(p.id)}
-                    className={`glass glass-hover p-6 text-left transition animate-fade-up relative ${
-                      selected ? "ring-2 ring-[color:var(--neon-green)]" : ""
-                    }`}>
-              {p.popular && (
-                <Badge tone="green" >
-                  <Sparkles className="size-3.5" /> Most popular
-                </Badge>
-              )}
+                    className={`glass glass-hover p-6 text-left transition animate-fade-up relative ${selected ? "ring-2 ring-[color:var(--neon-green)]" : ""}`}>
+              {p.popular && <Badge tone="green"><Sparkles className="size-3.5" /> Most popular</Badge>}
               <h3 className="mt-2 text-lg font-semibold">{p.name}</h3>
               <div className="mt-3 flex items-baseline gap-1">
                 <span className="font-display text-3xl font-bold">৳{p.price.toLocaleString()}</span>
@@ -89,8 +106,7 @@ function SubscriptionPage() {
               return (
                 <button key={m.id} onClick={() => setMethod(m.id)}
                         className={`glass glass-hover p-5 text-left ${sel ? "ring-2 ring-[color:var(--neon-green)]" : ""}`}>
-                  <div className="grid size-10 place-items-center rounded-xl text-white font-bold"
-                       style={{ background: m.c }}>{m.name[0]}</div>
+                  <div className="grid size-10 place-items-center rounded-xl text-white font-bold" style={{ background: m.c }}>{m.name[0]}</div>
                   <div className="mt-3 font-semibold">{m.name}</div>
                   <div className="text-xs text-muted-foreground">Mobile wallet</div>
                 </button>
@@ -99,11 +115,13 @@ function SubscriptionPage() {
           </div>
 
           {method && (
-            <form className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto] animate-fade-up" onSubmit={(e) => e.preventDefault()}>
-              <Field label="Transaction ID"><Input placeholder="e.g. 9KX72ALQ31" /></Field>
-              <div className="self-end"><Button>Submit payment</Button></div>
+            <form className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto] animate-fade-up" onSubmit={submit}>
+              <Field label="Transaction ID"><Input required value={txn} onChange={(e) => setTxn(e.target.value)} placeholder="e.g. 9KX72ALQ31" /></Field>
+              <div className="self-end"><Button type="submit" disabled={busy}>{busy ? "Submitting…" : "Submit payment"}</Button></div>
             </form>
           )}
+
+          {done && <div className="mt-4 text-sm text-[color:var(--neon-green)]">Payment submitted — pending admin approval.</div>}
         </div>
 
         <aside className="glass p-6 animate-fade-up h-fit">
@@ -111,6 +129,20 @@ function SubscriptionPage() {
           <div className="mt-3 text-2xl font-bold">৳{plans.find((p) => p.id === selectedPlan)!.price.toLocaleString()}</div>
           <div className="text-xs text-muted-foreground">{plans.find((p) => p.id === selectedPlan)!.name} plan</div>
           <div className="mt-4 text-sm">Method: <span className="font-semibold">{method ? methods.find((m) => m.id === method)!.name : "—"}</span></div>
+
+          {mine.length > 0 && (
+            <div className="mt-5 border-t border-white/5 pt-4">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Your submissions</div>
+              <ul className="space-y-2 text-xs">
+                {mine.map((s) => (
+                  <li key={s.id} className="flex items-center justify-between">
+                    <span>{s.plan} · {s.payment_method}</span>
+                    <Badge tone={s.status === "active" ? "green" : s.status === "rejected" ? "red" : "blue"}>{s.status}</Badge>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </aside>
       </section>
     </div>

@@ -14,16 +14,294 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      badges: {
+        Row: {
+          code: string
+          description: string
+          icon: string
+          id: string
+          name: string
+          requirement_type: string
+          requirement_value: number
+        }
+        Insert: {
+          code: string
+          description: string
+          icon: string
+          id?: string
+          name: string
+          requirement_type: string
+          requirement_value: number
+        }
+        Update: {
+          code?: string
+          description?: string
+          icon?: string
+          id?: string
+          name?: string
+          requirement_type?: string
+          requirement_value?: number
+        }
+        Relationships: []
+      }
+      gym_centers: {
+        Row: {
+          address: string
+          city: string
+          created_at: string
+          facilities: string[]
+          id: string
+          monthly_fee: number
+          name: string
+          phone: string | null
+        }
+        Insert: {
+          address: string
+          city: string
+          created_at?: string
+          facilities?: string[]
+          id?: string
+          monthly_fee: number
+          name: string
+          phone?: string | null
+        }
+        Update: {
+          address?: string
+          city?: string
+          created_at?: string
+          facilities?: string[]
+          id?: string
+          monthly_fee?: number
+          name?: string
+          phone?: string | null
+        }
+        Relationships: []
+      }
+      gym_registrations: {
+        Row: {
+          center_id: string
+          created_at: string
+          id: string
+          processed_at: string | null
+          status: Database["public"]["Enums"]["registration_status"]
+          user_id: string
+        }
+        Insert: {
+          center_id: string
+          created_at?: string
+          id?: string
+          processed_at?: string | null
+          status?: Database["public"]["Enums"]["registration_status"]
+          user_id: string
+        }
+        Update: {
+          center_id?: string
+          created_at?: string
+          id?: string
+          processed_at?: string | null
+          status?: Database["public"]["Enums"]["registration_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_registrations_center_id_fkey"
+            columns: ["center_id"]
+            isOneToOne: false
+            referencedRelation: "gym_centers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          bmi: number | null
+          created_at: string
+          email: string
+          height_cm: number | null
+          id: string
+          last_active_date: string | null
+          level: number
+          name: string
+          streak: number
+          subscription_type: string
+          updated_at: string
+          weight_kg: number | null
+          xp: number
+        }
+        Insert: {
+          bmi?: number | null
+          created_at?: string
+          email: string
+          height_cm?: number | null
+          id: string
+          last_active_date?: string | null
+          level?: number
+          name?: string
+          streak?: number
+          subscription_type?: string
+          updated_at?: string
+          weight_kg?: number | null
+          xp?: number
+        }
+        Update: {
+          bmi?: number | null
+          created_at?: string
+          email?: string
+          height_cm?: number | null
+          id?: string
+          last_active_date?: string | null
+          level?: number
+          name?: string
+          streak?: number
+          subscription_type?: string
+          updated_at?: string
+          weight_kg?: number | null
+          xp?: number
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          payment_method: Database["public"]["Enums"]["payment_method"] | null
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          starts_at: string
+          status: Database["public"]["Enums"]["subscription_status"]
+          transaction_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          payment_method?: Database["public"]["Enums"]["payment_method"] | null
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          starts_at?: string
+          status?: Database["public"]["Enums"]["subscription_status"]
+          transaction_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          payment_method?: Database["public"]["Enums"]["payment_method"] | null
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          starts_at?: string
+          status?: Database["public"]["Enums"]["subscription_status"]
+          transaction_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_badges: {
+        Row: {
+          badge_id: string
+          id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          id?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      workouts: {
+        Row: {
+          calories: number
+          created_at: string
+          distance_km: number | null
+          duration_min: number
+          exercise_name: string
+          id: string
+          user_id: string
+          workout_type: Database["public"]["Enums"]["workout_type"]
+          xp_earned: number
+        }
+        Insert: {
+          calories?: number
+          created_at?: string
+          distance_km?: number | null
+          duration_min?: number
+          exercise_name: string
+          id?: string
+          user_id: string
+          workout_type: Database["public"]["Enums"]["workout_type"]
+          xp_earned?: number
+        }
+        Update: {
+          calories?: number
+          created_at?: string
+          distance_km?: number | null
+          duration_min?: number
+          exercise_name?: string
+          id?: string
+          user_id?: string
+          workout_type?: Database["public"]["Enums"]["workout_type"]
+          xp_earned?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      payment_method: "bkash" | "nagad" | "rocket"
+      registration_status: "pending" | "approved" | "rejected"
+      subscription_plan: "trial" | "monthly" | "quarterly" | "yearly"
+      subscription_status: "pending" | "active" | "expired" | "rejected"
+      workout_type: "gym" | "running" | "home"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +428,13 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      payment_method: ["bkash", "nagad", "rocket"],
+      registration_status: ["pending", "approved", "rejected"],
+      subscription_plan: ["trial", "monthly", "quarterly", "yearly"],
+      subscription_status: ["pending", "active", "expired", "rejected"],
+      workout_type: ["gym", "running", "home"],
+    },
   },
 } as const
