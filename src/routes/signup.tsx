@@ -1,8 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Dumbbell, Target } from "lucide-react";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
+import { Dumbbell, Target } from "lucide-react";
 import { Button, Field, Input } from "@/components/ui-kit";
 import { bmiInfo } from "@/lib/mock-data";
+import { authService } from "@/services/authService";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({ meta: [{ title: "Sign up — FitX" }, { name: "description", content: "Create your FitX account." }] }),
@@ -10,9 +11,30 @@ export const Route = createFileRoute("/signup")({
 });
 
 function Signup() {
-  const [height, setHeight] = useState(178);
-  const [weight, setWeight] = useState(73);
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [height, setHeight] = useState(170);
+  const [weight, setWeight] = useState(65);
   const bmi = bmiInfo(height, weight);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setErr(null);
+    if (password.length < 8) { setErr("Password must be at least 8 characters."); return; }
+    if (password !== confirm) { setErr("Passwords don't match."); return; }
+    setBusy(true);
+    try {
+      await authService.signUp({ email, password, name, height_cm: height, weight_kg: weight });
+      router.navigate({ to: "/home" });
+    } catch (e: any) {
+      setErr(e.message ?? "Sign up failed");
+    } finally { setBusy(false); }
+  }
 
   return (
     <div className="min-h-screen grid place-items-center px-4 py-10">
@@ -27,17 +49,13 @@ function Signup() {
         <h1 className="text-2xl font-bold">Build your athlete profile</h1>
         <p className="mt-1 text-sm text-muted-foreground">It takes 30 seconds. Your AI coach starts the moment you finish.</p>
 
-        <form className="mt-6 grid gap-4 sm:grid-cols-2" onSubmit={(e) => e.preventDefault()}>
-          <Field label="Full name"><Input placeholder="Your name" defaultValue="Arjun Rahman" /></Field>
-          <Field label="Email"><Input type="email" placeholder="you@email.com" /></Field>
-          <Field label="Password" hint="At least 8 characters"><Input type="password" /></Field>
-          <Field label="Confirm"><Input type="password" /></Field>
-          <Field label="Height (cm)">
-            <Input type="number" value={height} onChange={(e) => setHeight(Number(e.target.value))} />
-          </Field>
-          <Field label="Weight (kg)">
-            <Input type="number" value={weight} onChange={(e) => setWeight(Number(e.target.value))} />
-          </Field>
+        <form className="mt-6 grid gap-4 sm:grid-cols-2" onSubmit={onSubmit}>
+          <Field label="Full name"><Input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Your name" /></Field>
+          <Field label="Email"><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" /></Field>
+          <Field label="Password" hint="At least 8 characters"><Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
+          <Field label="Confirm"><Input type="password" required value={confirm} onChange={(e) => setConfirm(e.target.value)} /></Field>
+          <Field label="Height (cm)"><Input type="number" value={height} onChange={(e) => setHeight(Number(e.target.value))} /></Field>
+          <Field label="Weight (kg)"><Input type="number" value={weight} onChange={(e) => setWeight(Number(e.target.value))} /></Field>
 
           <div className="sm:col-span-2 glass p-4" style={{ borderColor: `color-mix(in oklab, ${bmi.color} 40%, transparent)` }}>
             <div className="flex items-center justify-between gap-4">
@@ -55,8 +73,10 @@ function Signup() {
             </div>
           </div>
 
+          {err && <div className="sm:col-span-2 text-sm text-red-400">{err}</div>}
+
           <div className="sm:col-span-2">
-            <Link to="/home"><Button className="w-full">Create account & start training</Button></Link>
+            <Button type="submit" className="w-full" disabled={busy}>{busy ? "Creating…" : "Create account & start training"}</Button>
           </div>
         </form>
 

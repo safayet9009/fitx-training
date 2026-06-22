@@ -1,20 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Sparkles, Heart, Droplet, Wind, Moon, Activity } from "lucide-react";
 import { PageHeader, Badge } from "@/components/ui-kit";
-import { currentUser, bmiInfo } from "@/lib/mock-data";
+import { useUser } from "@/lib/user-context";
 
 export const Route = createFileRoute("/ai-coach")({
-  head: () => ({ meta: [{ title: "AI Coach — FitX" }, { name: "description", content: "Your personalized AI fitness coach." }] }),
+  head: () => ({ meta: [{ title: "AI Coach — FitX" }] }),
   component: AICoach,
 });
 
+function planFor(bmi: number) {
+  if (!bmi) return { name: "Maintenance plan", focus: "Balanced training" };
+  if (bmi > 25) return { name: "Weight loss plan", focus: "Cardio-led, calorie deficit" };
+  if (bmi < 18.5) return { name: "Weight gain plan", focus: "Strength + surplus calories" };
+  return { name: "Maintenance plan", focus: "Balanced strength + cardio" };
+}
+
 const daily = [
-  { icon: Heart,   c: "red",   t: "20 min cardio",  d: "Zone 2 — keep HR 120-140 bpm" },
-  { icon: Wind,    c: "blue",  t: "Stretching",     d: "10 min full body mobility" },
-  { icon: Droplet, c: "blue",  t: "Hydration",      d: "Hit 3L of water by 9 PM" },
+  { icon: Heart,    c: "red",   t: "20 min cardio", d: "Zone 2 — keep HR 120-140 bpm" },
+  { icon: Wind,     c: "blue",  t: "Stretching",    d: "10 min full body mobility" },
+  { icon: Droplet,  c: "blue",  t: "Hydration",     d: "Hit 3L of water by 9 PM" },
   { icon: Activity, c: "green", t: "Push session",  d: "Chest · Shoulders · Triceps" },
 ];
-
 const week = [
   { day: "Mon", focus: "Push", color: "green" },
   { day: "Tue", focus: "Pull", color: "blue" },
@@ -24,7 +30,6 @@ const week = [
   { day: "Sat", focus: "Long Run", color: "amber" },
   { day: "Sun", focus: "Recovery", color: "green" },
 ] as const;
-
 const recovery = [
   { icon: Moon, t: "Prioritize 7–8h sleep", d: "Recovery happens overnight." },
   { icon: Droplet, t: "Electrolytes after runs", d: "Replenish sodium & potassium." },
@@ -32,26 +37,28 @@ const recovery = [
 ];
 
 function AICoach() {
-  const bmi = bmiInfo(currentUser.height, currentUser.weight);
+  const { profile, bmi, level } = useUser();
+  const plan = planFor(bmi.value);
+
   return (
     <div className="space-y-6">
-      <PageHeader title="AI Coach" subtitle="Personalized plan based on your profile & streak." />
+      <PageHeader title="AI Coach" subtitle="Personalized plan based on your BMI, level & streak." />
 
       <section className="glass p-6 grid gap-4 sm:grid-cols-4 animate-fade-up">
         <div>
           <div className="text-xs uppercase tracking-wider text-muted-foreground">BMI</div>
-          <div className="mt-1 text-2xl font-bold" style={{ color: bmi.color }}>{bmi.value}</div>
+          <div className="mt-1 text-2xl font-bold" style={{ color: bmi.color }}>{bmi.value || "—"}</div>
           <Badge tone="green">{bmi.status}</Badge>
         </div>
         <div>
           <div className="text-xs uppercase tracking-wider text-muted-foreground">Level</div>
-          <div className="mt-1 text-2xl font-bold neon-text-green">{currentUser.level}</div>
-          <div className="text-xs text-muted-foreground">{currentUser.xp} XP</div>
+          <div className="mt-1 text-2xl font-bold neon-text-green">{level}</div>
+          <div className="text-xs text-muted-foreground">{profile?.xp ?? 0} XP</div>
         </div>
         <div className="sm:col-span-2">
-          <div className="text-xs uppercase tracking-wider text-muted-foreground">Goal</div>
-          <div className="mt-1 text-base font-semibold">{currentUser.goal}</div>
-          <p className="mt-1 text-sm text-muted-foreground">{bmi.goal} — focus on consistency over intensity this week.</p>
+          <div className="text-xs uppercase tracking-wider text-muted-foreground">Recommended plan</div>
+          <div className="mt-1 text-base font-semibold">{plan.name}</div>
+          <p className="mt-1 text-sm text-muted-foreground">{plan.focus} — {bmi.goal}.</p>
         </div>
       </section>
 

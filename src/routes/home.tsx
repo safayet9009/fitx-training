@@ -1,62 +1,70 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Flame, Zap, Dumbbell, Activity, Sparkles, Trophy, Target, Play, Building2 } from "lucide-react";
 import { PageHeader, StatCard, Progress, Badge, Button } from "@/components/ui-kit";
-import { activities } from "@/lib/mock-data";
 import { useUser } from "@/lib/user-context";
+import { workoutService, type Workout } from "@/services/workoutService";
 
 export const Route = createFileRoute("/home")({
   head: () => ({ meta: [{ title: "Dashboard — FitX" }, { name: "description", content: "Your FitX dashboard." }] }),
   component: Home,
 });
 
+function icon(t: string) { return t === "gym" ? "🏋️" : t === "running" ? "🏃" : "🏠"; }
+
 function Home() {
-  const { user, level, xpInLevel, xpToNext } = useUser();
+  const { profile, level, xpInLevel, xpToNext } = useUser();
   const pct = (xpInLevel / xpToNext) * 100;
+  const [recent, setRecent] = useState<Workout[]>([]);
+  const [weekly, setWeekly] = useState({ workouts: 0, minutes: 0, calories: 0, xp: 0 });
+
+  useEffect(() => {
+    if (!profile?.id) return;
+    workoutService.listForUser(profile.id, "all", 5).then(setRecent).catch(() => {});
+    workoutService.weeklyStats(profile.id).then(setWeekly).catch(() => {});
+  }, [profile?.id]);
+
+  const firstName = (profile?.name || "Athlete").split(" ")[0];
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title={`Hey ${user.name.split(" ")[0]} 👋`}
-        subtitle="Here's your training game plan for today."
-        action={
-          <Link to="/workout"><Button><Play className="size-4" /> Start workout</Button></Link>
-        }
-      />
+      <PageHeader title={`Hey ${firstName} 👋`} subtitle="Here's your training game plan for today."
+        action={<Link to="/workout"><Button><Play className="size-4" /> Start workout</Button></Link>} />
 
-      {/* Hero status */}
       <section className="grid gap-4 lg:grid-cols-3">
         <div className="glass glass-hover lg:col-span-2 p-6 animate-fade-up">
-          <Link to="/profile" className="block transition-transform hover:scale-[1.01] active:scale-[0.99]" aria-label="View XP details in profile">
+          <Link to="/profile" className="block transition-transform hover:scale-[1.01]">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <div className="chip"><Zap className="size-3.5 neon-text-green" /> Level {level}</div>
-                <h2 className="mt-3 text-2xl font-bold">{user.xp.toLocaleString()} XP</h2>
-                <p className="text-sm text-muted-foreground">{xpToNext - xpInLevel} XP to Level {level + 1}</p>
+                <h2 className="mt-3 text-2xl font-bold">{(profile?.xp ?? 0).toLocaleString()} XP</h2>
+                <p className="text-sm text-muted-foreground">{Math.max(0, xpToNext - xpInLevel)} XP to Level {level + 1}</p>
               </div>
-              <Badge tone="green">{user.totalWorkouts} workouts</Badge>
+              <Badge tone="green">{weekly.workouts} this week</Badge>
             </div>
             <div className="mt-5"><Progress value={pct} /></div>
           </Link>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Link to="/workout" className="glass glass-hover flex items-center gap-3 p-4 transition-transform hover:scale-[1.02] active:scale-[0.98]">
+            <Link to="/workout" className="glass glass-hover flex items-center gap-3 p-4 transition-transform hover:scale-[1.02]">
               <div className="grid size-10 place-items-center rounded-xl" style={{ background: "color-mix(in oklab, var(--neon-green) 18%, transparent)", color: "var(--neon-green)" }}>
                 <Dumbbell className="size-5" />
               </div>
               <div><div className="text-sm font-semibold">Start Workout</div><div className="text-xs text-muted-foreground">Gym · Run · Home</div></div>
             </Link>
-            <Link to="/activities" className="glass glass-hover flex items-center gap-3 p-4 transition-transform hover:scale-[1.02] active:scale-[0.98]">
+            <Link to="/activities" className="glass glass-hover flex items-center gap-3 p-4 transition-transform hover:scale-[1.02]">
               <div className="grid size-10 place-items-center rounded-xl" style={{ background: "color-mix(in oklab, var(--neon-blue) 18%, transparent)", color: "var(--neon-blue)" }}>
                 <Activity className="size-5" />
               </div>
               <div><div className="text-sm font-semibold">View Activity</div><div className="text-xs text-muted-foreground">Your feed</div></div>
             </Link>
-            <Link to="/ai-coach" className="glass glass-hover flex items-center gap-3 p-4 transition-transform hover:scale-[1.02] active:scale-[0.98]">
+            <Link to="/ai-coach" className="glass glass-hover flex items-center gap-3 p-4 transition-transform hover:scale-[1.02]">
               <div className="grid size-10 place-items-center rounded-xl" style={{ background: "color-mix(in oklab, var(--neon-purple) 22%, transparent)", color: "var(--neon-purple)" }}>
                 <Sparkles className="size-5" />
               </div>
               <div><div className="text-sm font-semibold">AI Coach</div><div className="text-xs text-muted-foreground">Today's plan</div></div>
             </Link>
-            <Link to="/centers" className="glass glass-hover flex items-center gap-3 p-4 transition-transform hover:scale-[1.02] active:scale-[0.98]">
+            <Link to="/centers" className="glass glass-hover flex items-center gap-3 p-4 transition-transform hover:scale-[1.02]">
               <div className="grid size-10 place-items-center rounded-xl" style={{ background: "color-mix(in oklab, var(--neon-amber) 20%, transparent)", color: "var(--neon-amber)" }}>
                 <Building2 className="size-5" />
               </div>
@@ -65,14 +73,14 @@ function Home() {
           </div>
         </div>
 
-        <Link to="/profile" className="glass glass-hover p-6 animate-fade-up block transition-transform hover:scale-[1.01] active:scale-[0.99]" style={{ background: "color-mix(in oklab, var(--neon-amber) 14%, transparent)" }} aria-label="View streak in profile">
+        <Link to="/profile" className="glass glass-hover p-6 animate-fade-up block transition-transform hover:scale-[1.01]" style={{ background: "color-mix(in oklab, var(--neon-amber) 14%, transparent)" }}>
           <div className="flex items-center gap-3">
             <div className="grid size-12 place-items-center rounded-2xl animate-badge-glow" style={{ background: "var(--gradient-streak)", color: "var(--background)" }}>
               <Flame className="size-6" />
             </div>
             <div>
               <div className="text-xs uppercase tracking-wider text-muted-foreground">Current streak</div>
-              <div className="text-3xl font-bold">{user.streak} days</div>
+              <div className="text-3xl font-bold">{profile?.streak ?? 0} days</div>
             </div>
           </div>
           <p className="mt-4 text-sm text-muted-foreground">Keep the fire alive — train today to extend your streak.</p>
@@ -83,41 +91,36 @@ function Home() {
         </Link>
       </section>
 
-      {/* Summary */}
-      <section className="grid gap-4 sm:grid-cols-3">
-        <Link to="/profile" className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
-          <StatCard label="Total workouts" value={user.totalWorkouts} accent="blue" icon={<Dumbbell className="size-4" />} />
-        </Link>
-        <Link to="/activities" className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
-          <StatCard label="Running" value={`${user.runningKm} km`} accent="purple" icon={<Activity className="size-4" />} />
-        </Link>
-        <Link to="/profile" className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
-          <StatCard label="Total XP" value={user.xp} accent="green" icon={<Trophy className="size-4" />} />
-        </Link>
+      <section className="grid gap-4 sm:grid-cols-4">
+        <StatCard label="Workouts" value={weekly.workouts} hint="This week" accent="blue" icon={<Dumbbell className="size-4" />} />
+        <StatCard label="Minutes" value={weekly.minutes} hint="This week" accent="purple" icon={<Activity className="size-4" />} />
+        <StatCard label="Calories" value={weekly.calories} hint="This week" accent="red" icon={<Flame className="size-4" />} />
+        <StatCard label="Total XP" value={profile?.xp ?? 0} accent="green" icon={<Trophy className="size-4" />} />
       </section>
 
-      {/* Recent activity */}
       <section className="glass p-6">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold">Recent activity</h3>
           <Link to="/activities" className="text-sm text-muted-foreground hover:text-foreground">View all →</Link>
         </div>
-        <ul className="divide-y divide-white/5">
-          {activities.slice(0, 4).map((a) => (
-            <li key={a.id} className="flex items-center justify-between gap-4 py-3">
-              <div className="min-w-0 flex items-center gap-3">
-                <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-white/5">
-                  {a.type === "gym" ? "🏋️" : a.type === "run" ? "🏃" : "🏠"}
+        {recent.length === 0 ? (
+          <div className="py-6 text-center text-sm text-muted-foreground">No workouts yet. <Link to="/workout" className="text-foreground underline">Log your first →</Link></div>
+        ) : (
+          <ul className="divide-y divide-white/5">
+            {recent.map((a) => (
+              <li key={a.id} className="flex items-center justify-between gap-4 py-3">
+                <div className="min-w-0 flex items-center gap-3">
+                  <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-white/5">{icon(a.workout_type)}</div>
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-semibold">{a.exercise_name}</div>
+                    <div className="text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString()} · {a.duration_min} min</div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-semibold">{a.title}</div>
-                  <div className="text-xs text-muted-foreground">{a.date} · {a.duration}</div>
-                </div>
-              </div>
-              <Badge tone="green">+{a.xp} XP</Badge>
-            </li>
-          ))}
-        </ul>
+                <Badge tone="green">+{a.xp_earned} XP</Badge>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );
