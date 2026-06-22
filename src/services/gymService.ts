@@ -37,13 +37,18 @@ export const gymService = {
     const { error } = await supabase.from("gym_registrations").insert({ user_id, center_id });
     if (error) throw error;
   },
-  async listRegistrations(): Promise<(GymRegistration & { profiles?: { name: string; email: string } | null; gym_centers?: { name: string } | null })[]> {
+  async listRegistrations() {
     const { data, error } = await supabase
       .from("gym_registrations")
-      .select("*, profiles(name,email), gym_centers(name)")
+      .select("*, gym_centers(name)")
       .order("created_at", { ascending: false });
     if (error) throw error;
-    return (data ?? []) as any;
+    const rows = (data ?? []) as any[];
+    const userIds = [...new Set(rows.map((r) => r.user_id))];
+    if (userIds.length === 0) return rows;
+    const { data: profs } = await supabase.from("profiles").select("id,name,email").in("id", userIds);
+    const map = new Map((profs ?? []).map((p) => [p.id, p]));
+    return rows.map((r) => ({ ...r, profiles: map.get(r.user_id) ?? null }));
   },
   async myRegistrations(user_id: string) {
     const { data, error } = await supabase
