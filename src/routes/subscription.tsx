@@ -97,6 +97,43 @@ function SubscriptionPage() {
         })}
       </section>
 
+      <section className="glass animate-fade-up overflow-x-auto p-6">
+        <h3 className="text-lg font-semibold">Compare plans</h3>
+        <table className="mt-4 w-full text-sm">
+          <thead>
+            <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground">
+              <th className="py-2 pr-3 font-medium">Feature</th>
+              <th className="py-2 pr-3 font-medium">Free Trial</th>
+              <th className="py-2 pr-3 font-medium">Pro</th>
+              <th className="py-2 pr-3 font-medium">Gym Member Pro</th>
+            </tr>
+          </thead>
+          <tbody className="[&_tr]:border-t [&_tr]:border-white/5">
+            {[
+              ["Unlimited workout logging", true, true, true],
+              ["AI Coach recommendations", true, true, true],
+              ["XP, streak & badges", true, true, true],
+              ["Leaderboard ranking", true, true, true],
+              ["Video exercise library", "Limited", true, true],
+              ["Priority support", false, true, true],
+              ["Exclusive Pro badges", false, true, true],
+              ["Branch gym access", false, false, true],
+              ["Personal trainer sessions", false, false, true],
+            ].map(([feature, t, p, g]) => (
+              <tr key={String(feature)}>
+                <td className="py-2.5 pr-3 font-medium">{feature}</td>
+                <td className="py-2.5 pr-3">{cell(t)}</td>
+                <td className="py-2.5 pr-3">{cell(p)}</td>
+                <td className="py-2.5 pr-3">{cell(g)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="mt-3 text-xs text-muted-foreground">
+          Current plan: <Badge tone={profile?.subscription_type === "pro" ? "green" : "amber"}>{profile?.subscription_type ?? "free"}</Badge>
+        </div>
+      </section>
+
       <section className="grid gap-4 lg:grid-cols-[1fr_22rem]">
         <div className="glass p-6 animate-fade-up">
           <h3 className="text-lg font-semibold">Choose payment method</h3>
