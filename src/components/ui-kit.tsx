@@ -138,12 +138,18 @@ export function Field({ label, children, hint }: { label: string; children: Reac
   );
 }
 
-export function Modal({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: ReactNode }) {
+export function Modal({
+  open, onClose, title, children, size = "md",
+}: {
+  open: boolean; onClose: () => void; title: string; children: ReactNode;
+  size?: "md" | "lg" | "xl";
+}) {
   if (!open) return null;
+  const sizeClass = size === "xl" ? "max-w-3xl" : size === "lg" ? "max-w-2xl" : "max-w-md";
   return (
     <div className="fixed inset-0 z-50 grid place-items-center p-4 animate-fade-up">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative glass w-full max-w-md p-6">
+      <div className={`relative glass w-full ${sizeClass} max-h-[90vh] overflow-y-auto p-6`}>
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold">{title}</h3>
           <button onClick={onClose} className="rounded-lg px-2 py-1 text-sm text-muted-foreground hover:bg-white/5">✕</button>
