@@ -1,7 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Check, Sparkles } from "lucide-react";
+import { Check, Sparkles, X } from "lucide-react";
 import { PageHeader, Button, Field, Input, Badge } from "@/components/ui-kit";
+
+function cell(v: boolean | string) {
+  if (v === true) return <Check className="size-4 neon-text-green" />;
+  if (v === false) return <X className="size-4 text-muted-foreground/50" />;
+  return <span className="text-xs text-muted-foreground">{v}</span>;
+}
 import { useUser } from "@/lib/user-context";
 import { subscriptionService, type PaymentMethod, type SubscriptionPlan } from "@/services/subscriptionService";
 
