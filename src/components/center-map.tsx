@@ -14,8 +14,7 @@ export function CenterMap({
       const [rl, L] = await Promise.all([
         import("react-leaflet"),
         import("leaflet"),
-        // @ts-expect-error css side-effect
-        import("leaflet/dist/leaflet.css"),
+        import("leaflet/dist/leaflet.css" as any),
       ]);
       const icon = L.icon({
         iconUrl: "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-icon.png",
