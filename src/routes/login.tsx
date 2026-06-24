@@ -15,6 +15,8 @@ function Login() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [resetMode, setResetMode] = useState(false);
+  const [resetMsg, setResetMsg] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -27,6 +29,17 @@ function Login() {
     } finally { setBusy(false); }
   }
 
+  async function onReset(e: React.FormEvent) {
+    e.preventDefault();
+    setErr(null); setResetMsg(null); setBusy(true);
+    try {
+      await authService.requestPasswordReset(email);
+      setResetMsg("Check your inbox for a password reset link.");
+    } catch (e: any) {
+      setErr(e.message ?? "Could not send reset email");
+    } finally { setBusy(false); }
+  }
+
   return (
     <div className="min-h-screen grid place-items-center px-4 py-10">
       <div className="glass w-full max-w-md p-7 animate-fade-up">
@@ -36,19 +49,40 @@ function Login() {
           </div>
           <span className="font-display text-xl font-bold">FitX</span>
         </Link>
-        <h1 className="text-2xl font-bold">Welcome back</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Pick up your streak where you left off.</p>
+        <h1 className="text-2xl font-bold">{resetMode ? "Reset password" : "Welcome back"}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {resetMode ? "We'll email you a recovery link." : "Pick up your streak where you left off."}
+        </p>
 
-        <form className="mt-6 space-y-4" onSubmit={onSubmit}>
-          <Field label="Email">
-            <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" />
-          </Field>
-          <Field label="Password">
-            <Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
-          </Field>
-          {err && <div className="text-sm text-red-400">{err}</div>}
-          <Button type="submit" className="w-full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
-        </form>
+        {!resetMode ? (
+          <form className="mt-6 space-y-4" onSubmit={onSubmit}>
+            <Field label="Email">
+              <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" />
+            </Field>
+            <Field label="Password">
+              <Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+            </Field>
+            {err && <div className="text-sm text-red-400">{err}</div>}
+            <Button type="submit" className="w-full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
+            <button type="button" onClick={() => { setErr(null); setResetMode(true); }}
+              className="block w-full text-center text-xs text-muted-foreground hover:text-foreground">
+              Forgot password?
+            </button>
+          </form>
+        ) : (
+          <form className="mt-6 space-y-4" onSubmit={onReset}>
+            <Field label="Email">
+              <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" />
+            </Field>
+            {err && <div className="text-sm text-red-400">{err}</div>}
+            {resetMsg && <div className="text-sm text-emerald-400">{resetMsg}</div>}
+            <Button type="submit" className="w-full" disabled={busy}>{busy ? "Sending…" : "Send reset link"}</Button>
+            <button type="button" onClick={() => { setErr(null); setResetMsg(null); setResetMode(false); }}
+              className="block w-full text-center text-xs text-muted-foreground hover:text-foreground">
+              Back to sign in
+            </button>
+          </form>
+        )}
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           New to FitX? <Link to="/signup" className="font-semibold text-foreground hover:underline">Create an account</Link>
