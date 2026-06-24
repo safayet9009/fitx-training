@@ -41,4 +41,16 @@ export const authService = {
     const { data } = await supabase.auth.getSession();
     return data.session;
   },
+
+  async requestPasswordReset(email: string) {
+    const redirectTo =
+      typeof window !== "undefined" ? `${window.location.origin}/reset-password` : undefined;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) throw error;
+  },
+
+  async updatePassword(newPassword: string) {
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw error;
+  },
 };
