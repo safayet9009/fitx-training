@@ -33,6 +33,7 @@ function SubscriptionPage() {
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>("quarterly");
   const [method, setMethod] = useState<PaymentMethod | null>(null);
   const [txn, setTxn] = useState("");
+  const [sender, setSender] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [mine, setMine] = useState<any[]>([]);
