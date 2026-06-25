@@ -190,3 +190,35 @@ function ProfilePage() {
     </div>
   );
 }
+
+function VerifyRow({ icon, title, value, ok, action, note }: {
+  icon: React.ReactNode;
+  title: string;
+  value: string;
+  ok: boolean;
+  action?: React.ReactNode;
+  note?: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <span className="grid size-7 place-items-center rounded-lg bg-white/10">{icon}</span>
+            {title}
+          </div>
+          <div className="mt-1 truncate text-xs text-muted-foreground">{value}</div>
+          {note && <div className="mt-1 text-[11px] text-muted-foreground">{note}</div>}
+        </div>
+        <div className="flex flex-col items-end gap-2">
+          {ok ? (
+            <Badge tone="green"><CheckCircle2 className="size-3.5" /> Verified</Badge>
+          ) : (
+            <Badge tone="red"><XCircle className="size-3.5" /> Not verified</Badge>
+          )}
+          {action}
+        </div>
+      </div>
+    </div>
+  );
+}
