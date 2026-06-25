@@ -12,6 +12,9 @@ export type Profile = {
   streak: number;
   last_active_date: string | null;
   subscription_type: string;
+  phone: string | null;
+  phone_verified: boolean;
+  phone_verified_at: string | null;
 };
 
 export const profileService = {
