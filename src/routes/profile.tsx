@@ -75,6 +75,8 @@ function ProfilePage() {
               <Badge tone="green"><Zap className="size-3.5" /> Lv {level}</Badge>
               <Badge tone="amber"><Flame className="size-3.5" /> {profile?.streak ?? 0}-day streak</Badge>
               <Badge>{profile?.subscription_type ?? "free"}</Badge>
+              {emailVerified && <Badge tone="green"><ShieldCheck className="size-3.5" /> Email verified</Badge>}
+              {phoneVerified && <Badge tone="green"><ShieldCheck className="size-3.5" /> Phone verified</Badge>}
             </div>
           </div>
           <div className="w-full sm:w-56">
