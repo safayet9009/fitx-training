@@ -53,4 +53,15 @@ export const authService = {
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) throw error;
   },
+
+  async resendVerification(email: string) {
+    const redirectTo =
+      typeof window !== "undefined" ? `${window.location.origin}/home` : undefined;
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: redirectTo },
+    });
+    if (error) throw error;
+  },
 };

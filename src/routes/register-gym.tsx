@@ -80,7 +80,15 @@ function WizardFlow() {
     if (!profile || !center) return;
     setSubmitting(true);
     try {
-      await gymService.register(profile.id, center.id);
+      await gymService.register({
+        user_id: profile.id,
+        center_id: center.id,
+        plan,
+        payment_method: method,
+        sender_number: info.phone,
+        transaction_id: txn,
+        amount: price,
+      });
       setDone(true);
     } finally { setSubmitting(false); }
   }

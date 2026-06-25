@@ -1,17 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Users, Building2, CreditCard, BarChart3, Shield, Check, X, Trash2 } from "lucide-react";
+import { Users, Building2, CreditCard, BarChart3, Shield, Check, X, Trash2, Mail, Phone } from "lucide-react";
 import { PageHeader, Tabs, StatCard, Button, Badge, Modal, Input, Field } from "@/components/ui-kit";
 import { adminService } from "@/services/adminService";
 import { gymService, type GymCenter } from "@/services/gymService";
 import { subscriptionService } from "@/services/subscriptionService";
+import { profileService } from "@/services/profileService";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — FitX" }] }),
   component: AdminPage,
 });
 
-type Tab = "analytics" | "users" | "gyms" | "registrations" | "payments";
+type Tab = "analytics" | "users" | "gyms" | "registrations" | "payments" | "verification";
 
 function AdminPage() {
   const [tab, setTab] = useState<Tab>("analytics");
@@ -23,6 +24,7 @@ function AdminPage() {
         tabs={[
           { id: "analytics", label: "Analytics", icon: <BarChart3 className="size-4" /> },
           { id: "users",     label: "Users",     icon: <Users className="size-4" /> },
+          { id: "verification", label: "Verification", icon: <Shield className="size-4" /> },
           { id: "gyms",      label: "Gyms",      icon: <Building2 className="size-4" /> },
           { id: "registrations", label: "Registrations", icon: <Check className="size-4" /> },
           { id: "payments",  label: "Payments",  icon: <CreditCard className="size-4" /> },
@@ -31,10 +33,51 @@ function AdminPage() {
       />
       {tab === "analytics" && <AnalyticsTab />}
       {tab === "users" && <UsersTab />}
+      {tab === "verification" && <VerificationTab />}
       {tab === "gyms" && <GymsTab />}
       {tab === "registrations" && <RegistrationsTab />}
       {tab === "payments" && <PaymentsTab />}
     </div>
+  );
+}
+
+function VerificationTab() {
+  const [rows, setRows] = useState<any[]>([]);
+  useEffect(() => { profileService.listAllForAdmin().then(setRows); }, []);
+  const phoneVerified = rows.filter((r) => r.phone_verified).length;
+  const phoneUnverified = rows.length - phoneVerified;
+
+  return (
+    <section className="space-y-4 animate-fade-up">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <StatCard label="Total accounts" value={rows.length} accent="blue" icon={<Users className="size-4" />} />
+        <StatCard label="Phones verified" value={phoneVerified} accent="green" icon={<Phone className="size-4" />} />
+        <StatCard label="Phones unverified" value={phoneUnverified} accent="amber" icon={<Phone className="size-4" />} />
+      </div>
+
+      <div className="glass overflow-hidden">
+        <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_7rem_7rem_6rem] gap-3 border-b border-white/5 px-5 py-3 text-xs uppercase tracking-wider text-muted-foreground">
+          <span>User</span><span>Phone</span><span>Email</span><span>Phone</span><span>Plan</span>
+        </div>
+        <ul>
+          {rows.map((u) => (
+            <li key={u.id} className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_7rem_7rem_6rem] items-center gap-3 px-5 py-3 hover:bg-white/5">
+              <div className="min-w-0">
+                <div className="truncate font-medium">{u.name || "—"}</div>
+                <div className="truncate text-xs text-muted-foreground">{u.email}</div>
+              </div>
+              <span className="truncate font-mono text-xs">{u.phone || "—"}</span>
+              <Badge tone="green"><Mail className="size-3" /> Verified</Badge>
+              {u.phone_verified
+                ? <Badge tone="green"><Check className="size-3" /> Verified</Badge>
+                : <Badge tone="red"><X className="size-3" /> Pending</Badge>}
+              <Badge tone={u.subscription_type === "pro" ? "green" : "blue"}>{u.subscription_type}</Badge>
+            </li>
+          ))}
+          {rows.length === 0 && <li className="px-5 py-8 text-center text-sm text-muted-foreground">No accounts yet.</li>}
+        </ul>
+      </div>
+    </section>
   );
 }
 
@@ -193,7 +236,10 @@ function PaymentsTab() {
           <li key={p.id} className="grid grid-cols-[minmax(0,1fr)_5rem_6rem_8rem_6rem_auto] items-center gap-3 px-5 py-3 hover:bg-white/5">
             <div className="min-w-0">
               <div className="truncate font-medium">{p.profiles?.name ?? "—"}</div>
-              <div className="text-xs text-muted-foreground">{p.plan}</div>
+              <div className="text-xs text-muted-foreground">
+                {p.plan}{p.amount ? ` · ৳${Number(p.amount).toLocaleString()}` : ""}
+                {p.sender_number ? <span className="ml-2 font-mono">from {p.sender_number}</span> : null}
+              </div>
             </div>
             <Badge tone="blue">{p.payment_method}</Badge>
             <span className="font-mono text-xs truncate">{p.transaction_id}</span>

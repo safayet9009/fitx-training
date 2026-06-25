@@ -33,6 +33,7 @@ function SubscriptionPage() {
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>("quarterly");
   const [method, setMethod] = useState<PaymentMethod | null>(null);
   const [txn, setTxn] = useState("");
+  const [sender, setSender] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [mine, setMine] = useState<any[]>([]);
@@ -61,8 +62,9 @@ function SubscriptionPage() {
     try {
       await subscriptionService.submit({
         user_id: profile.id, plan: selectedPlan, payment_method: method, transaction_id: txn,
+        sender_number: sender, amount: plans.find((p) => p.id === selectedPlan)!.price,
       });
-      setDone(true); setTxn(""); setMethod(null);
+      setDone(true); setTxn(""); setSender(""); setMethod(null);
     } finally { setBusy(false); }
   }
 
@@ -158,9 +160,10 @@ function SubscriptionPage() {
           </div>
 
           {method && (
-            <form className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto] animate-fade-up" onSubmit={submit}>
+            <form className="mt-6 grid gap-3 sm:grid-cols-2 animate-fade-up" onSubmit={submit}>
+              <Field label="Sender number"><Input required value={sender} onChange={(e) => setSender(e.target.value)} placeholder="01XXXXXXXXX" /></Field>
               <Field label="Transaction ID"><Input required value={txn} onChange={(e) => setTxn(e.target.value)} placeholder="e.g. 9KX72ALQ31" /></Field>
-              <div className="self-end"><Button type="submit" disabled={busy}>{busy ? "Submitting…" : "Submit payment"}</Button></div>
+              <div className="sm:col-span-2"><Button type="submit" disabled={busy}>{busy ? "Submitting…" : "Submit payment for review"}</Button></div>
             </form>
           )}
 

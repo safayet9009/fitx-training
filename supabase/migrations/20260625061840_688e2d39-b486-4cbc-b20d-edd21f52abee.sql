@@ -1,0 +1,16 @@
+
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS phone TEXT,
+  ADD COLUMN IF NOT EXISTS phone_verified BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS phone_verified_at TIMESTAMPTZ;
+
+ALTER TABLE public.gym_registrations
+  ADD COLUMN IF NOT EXISTS plan TEXT,
+  ADD COLUMN IF NOT EXISTS payment_method TEXT,
+  ADD COLUMN IF NOT EXISTS sender_number TEXT,
+  ADD COLUMN IF NOT EXISTS transaction_id TEXT,
+  ADD COLUMN IF NOT EXISTS amount NUMERIC;
+
+ALTER TABLE public.subscriptions
+  ADD COLUMN IF NOT EXISTS sender_number TEXT,
+  ADD COLUMN IF NOT EXISTS amount NUMERIC;

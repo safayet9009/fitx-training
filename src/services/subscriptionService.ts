@@ -13,6 +13,8 @@ export const subscriptionService = {
     plan: SubscriptionPlan;
     payment_method: PaymentMethod;
     transaction_id: string;
+    sender_number?: string;
+    amount?: number;
   }) {
     const expires_at = new Date();
     expires_at.setDate(expires_at.getDate() + planDays[input.plan]);
@@ -21,6 +23,8 @@ export const subscriptionService = {
       plan: input.plan,
       payment_method: input.payment_method,
       transaction_id: input.transaction_id,
+      sender_number: input.sender_number ?? null,
+      amount: input.amount ?? null,
       expires_at: expires_at.toISOString(),
     });
     if (error) throw error;
