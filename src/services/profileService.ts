@@ -27,6 +27,28 @@ export const profileService = {
     const { error } = await supabase.from("profiles").update(patch).eq("id", id);
     if (error) throw error;
   },
+  async setPhone(id: string, phone: string) {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ phone, phone_verified: false, phone_verified_at: null })
+      .eq("id", id);
+    if (error) throw error;
+  },
+  async markPhoneVerified(id: string, phone: string) {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ phone, phone_verified: true, phone_verified_at: new Date().toISOString() })
+      .eq("id", id);
+    if (error) throw error;
+  },
+  async listAllForAdmin() {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id,name,email,phone,phone_verified,subscription_type,created_at")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  },
   async isAdmin(userId: string): Promise<boolean> {
     const { data, error } = await supabase
       .from("user_roles")
