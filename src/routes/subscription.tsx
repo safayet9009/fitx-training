@@ -62,8 +62,9 @@ function SubscriptionPage() {
     try {
       await subscriptionService.submit({
         user_id: profile.id, plan: selectedPlan, payment_method: method, transaction_id: txn,
+        sender_number: sender, amount: plans.find((p) => p.id === selectedPlan)!.price,
       });
-      setDone(true); setTxn(""); setMethod(null);
+      setDone(true); setTxn(""); setSender(""); setMethod(null);
     } finally { setBusy(false); }
   }
 
