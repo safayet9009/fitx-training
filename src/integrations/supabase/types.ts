@@ -79,27 +79,42 @@ export type Database = {
       }
       gym_registrations: {
         Row: {
+          amount: number | null
           center_id: string
           created_at: string
           id: string
+          payment_method: string | null
+          plan: string | null
           processed_at: string | null
+          sender_number: string | null
           status: Database["public"]["Enums"]["registration_status"]
+          transaction_id: string | null
           user_id: string
         }
         Insert: {
+          amount?: number | null
           center_id: string
           created_at?: string
           id?: string
+          payment_method?: string | null
+          plan?: string | null
           processed_at?: string | null
+          sender_number?: string | null
           status?: Database["public"]["Enums"]["registration_status"]
+          transaction_id?: string | null
           user_id: string
         }
         Update: {
+          amount?: number | null
           center_id?: string
           created_at?: string
           id?: string
+          payment_method?: string | null
+          plan?: string | null
           processed_at?: string | null
+          sender_number?: string | null
           status?: Database["public"]["Enums"]["registration_status"]
+          transaction_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -122,6 +137,9 @@ export type Database = {
           last_active_date: string | null
           level: number
           name: string
+          phone: string | null
+          phone_verified: boolean
+          phone_verified_at: string | null
           streak: number
           subscription_type: string
           updated_at: string
@@ -137,6 +155,9 @@ export type Database = {
           last_active_date?: string | null
           level?: number
           name?: string
+          phone?: string | null
+          phone_verified?: boolean
+          phone_verified_at?: string | null
           streak?: number
           subscription_type?: string
           updated_at?: string
@@ -152,6 +173,9 @@ export type Database = {
           last_active_date?: string | null
           level?: number
           name?: string
+          phone?: string | null
+          phone_verified?: boolean
+          phone_verified_at?: string | null
           streak?: number
           subscription_type?: string
           updated_at?: string
@@ -162,33 +186,39 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          amount: number | null
           created_at: string
           expires_at: string
           id: string
           payment_method: Database["public"]["Enums"]["payment_method"] | null
           plan: Database["public"]["Enums"]["subscription_plan"]
+          sender_number: string | null
           starts_at: string
           status: Database["public"]["Enums"]["subscription_status"]
           transaction_id: string | null
           user_id: string
         }
         Insert: {
+          amount?: number | null
           created_at?: string
           expires_at: string
           id?: string
           payment_method?: Database["public"]["Enums"]["payment_method"] | null
           plan: Database["public"]["Enums"]["subscription_plan"]
+          sender_number?: string | null
           starts_at?: string
           status?: Database["public"]["Enums"]["subscription_status"]
           transaction_id?: string | null
           user_id: string
         }
         Update: {
+          amount?: number | null
           created_at?: string
           expires_at?: string
           id?: string
           payment_method?: Database["public"]["Enums"]["payment_method"] | null
           plan?: Database["public"]["Enums"]["subscription_plan"]
+          sender_number?: string | null
           starts_at?: string
           status?: Database["public"]["Enums"]["subscription_status"]
           transaction_id?: string | null
