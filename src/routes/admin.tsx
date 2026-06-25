@@ -44,7 +44,6 @@ function AdminPage() {
 function VerificationTab() {
   const [rows, setRows] = useState<any[]>([]);
   useEffect(() => { profileService.listAllForAdmin().then(setRows); }, []);
-  const emailVerified = rows.filter((r) => r.phone_verified || true).length; // proxy; auth.users not exposed
   const phoneVerified = rows.filter((r) => r.phone_verified).length;
   const phoneUnverified = rows.length - phoneVerified;
 
