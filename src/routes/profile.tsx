@@ -86,6 +86,65 @@ function ProfilePage() {
         </div>
       </section>
 
+      <section className="glass p-6 animate-fade-up">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <ShieldCheck className="size-4 neon-text-green" /> Verification Center
+          </h2>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <VerifyRow
+            icon={<Mail className="size-4" />}
+            title="Email"
+            value={profile?.email ?? "—"}
+            ok={emailVerified}
+            action={
+              emailVerified ? null : (
+                <Button onClick={onResendEmail} disabled={resending}>
+                  {resending ? "Sending…" : "Resend email"}
+                </Button>
+              )
+            }
+            note={resendMsg && !emailVerified ? resendMsg : undefined}
+          />
+          <VerifyRow
+            icon={<Phone className="size-4" />}
+            title="Phone"
+            value={profile?.phone || "Not added"}
+            ok={phoneVerified}
+            action={
+              <Link to="/verify-phone">
+                <Button variant={phoneVerified ? "secondary" : "primary"}>
+                  {phoneVerified ? "Update" : profile?.phone ? "Verify" : "Add phone"}
+                </Button>
+              </Link>
+            }
+          />
+          <VerifyRow
+            icon={<Crown className="size-4" />}
+            title="Subscription"
+            value={(profile?.subscription_type ?? "free").toUpperCase()}
+            ok={isPro}
+            action={
+              !isPro && (
+                <Link to="/subscription"><Button>Upgrade</Button></Link>
+              )
+            }
+          />
+          <VerifyRow
+            icon={<Building2 className="size-4" />}
+            title="Gym membership"
+            value={gymMember ? "Active member" : "Not a member"}
+            ok={gymMember}
+            action={
+              !gymMember && (
+                <Link to="/register-gym"><Button>Register</Button></Link>
+              )
+            }
+          />
+        </div>
+      </section>
+
       <section className="grid gap-4 sm:grid-cols-3">
         <div className="glass p-5 animate-fade-up">
           <div className="text-xs uppercase tracking-wider text-muted-foreground">BMI</div>
