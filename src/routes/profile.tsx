@@ -14,9 +14,16 @@ export const Route = createFileRoute("/profile")({
 
 function ProfilePage() {
   const router = useRouter();
-  const { profile, level, xpInLevel, xpToNext, bmi, badges, signOut } = useUser();
+  const { profile, session, level, xpInLevel, xpToNext, bmi, badges, signOut } = useUser();
   const pct = (xpInLevel / xpToNext) * 100;
   const [stats, setStats] = useState({ total: 0, runKm: 0 });
+  const [gymMember, setGymMember] = useState(false);
+  const [resendMsg, setResendMsg] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+
+  const emailVerified = !!session?.user?.email_confirmed_at || !!(session?.user as any)?.confirmed_at;
+  const phoneVerified = !!profile?.phone_verified;
+  const isPro = profile?.subscription_type === "pro";
 
   useEffect(() => {
     if (!profile?.id) return;
