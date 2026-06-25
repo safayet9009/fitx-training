@@ -236,7 +236,10 @@ function PaymentsTab() {
           <li key={p.id} className="grid grid-cols-[minmax(0,1fr)_5rem_6rem_8rem_6rem_auto] items-center gap-3 px-5 py-3 hover:bg-white/5">
             <div className="min-w-0">
               <div className="truncate font-medium">{p.profiles?.name ?? "—"}</div>
-              <div className="text-xs text-muted-foreground">{p.plan}</div>
+              <div className="text-xs text-muted-foreground">
+                {p.plan}{p.amount ? ` · ৳${Number(p.amount).toLocaleString()}` : ""}
+                {p.sender_number ? <span className="ml-2 font-mono">from {p.sender_number}</span> : null}
+              </div>
             </div>
             <Badge tone="blue">{p.payment_method}</Badge>
             <span className="font-mono text-xs truncate">{p.transaction_id}</span>
