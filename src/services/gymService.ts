@@ -33,8 +33,16 @@ export const gymService = {
     const { error } = await supabase.from("gym_centers").delete().eq("id", id);
     if (error) throw error;
   },
-  async register(user_id: string, center_id: string) {
-    const { error } = await supabase.from("gym_registrations").insert({ user_id, center_id });
+  async register(input: {
+    user_id: string;
+    center_id: string;
+    plan?: string;
+    payment_method?: string;
+    sender_number?: string;
+    transaction_id?: string;
+    amount?: number;
+  }) {
+    const { error } = await supabase.from("gym_registrations").insert(input as any);
     if (error) throw error;
   },
   async listRegistrations() {
