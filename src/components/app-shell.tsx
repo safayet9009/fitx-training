@@ -7,7 +7,7 @@ import {
 import { useUser } from "@/lib/user-context";
 import { Footer } from "@/components/footer";
 
-const PUBLIC_PATHS = new Set(["/", "/login", "/signup", "/reset-password"]);
+const PUBLIC_PATHS = new Set(["/", "/login", "/signup", "/reset-password", "/admin-recovery"]);
 
 const nav = [
   { to: "/home", label: "Dashboard", icon: LayoutDashboard, admin: false },
