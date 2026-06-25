@@ -160,9 +160,10 @@ function SubscriptionPage() {
           </div>
 
           {method && (
-            <form className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto] animate-fade-up" onSubmit={submit}>
+            <form className="mt-6 grid gap-3 sm:grid-cols-2 animate-fade-up" onSubmit={submit}>
+              <Field label="Sender number"><Input required value={sender} onChange={(e) => setSender(e.target.value)} placeholder="01XXXXXXXXX" /></Field>
               <Field label="Transaction ID"><Input required value={txn} onChange={(e) => setTxn(e.target.value)} placeholder="e.g. 9KX72ALQ31" /></Field>
-              <div className="self-end"><Button type="submit" disabled={busy}>{busy ? "Submitting…" : "Submit payment"}</Button></div>
+              <div className="sm:col-span-2"><Button type="submit" disabled={busy}>{busy ? "Submitting…" : "Submit payment for review"}</Button></div>
             </form>
           )}
 
