@@ -1,9 +1,11 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Flame, Zap, Dumbbell, Activity, Award, Settings, LogOut } from "lucide-react";
+import { Flame, Zap, Dumbbell, Activity, Award, Settings, LogOut, ShieldCheck, Mail, Phone, Crown, Building2, CheckCircle2, XCircle } from "lucide-react";
 import { PageHeader, StatCard, Progress, Badge, Button } from "@/components/ui-kit";
 import { useUser } from "@/lib/user-context";
 import { workoutService } from "@/services/workoutService";
+import { authService } from "@/services/authService";
+import { gymService } from "@/services/gymService";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Profile — FitX" }] }),
