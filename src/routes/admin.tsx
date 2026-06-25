@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Users, Building2, CreditCard, BarChart3, Shield, Check, X, Trash2 } from "lucide-react";
+import { Users, Building2, CreditCard, BarChart3, Shield, Check, X, Trash2, Mail, Phone } from "lucide-react";
 import { PageHeader, Tabs, StatCard, Button, Badge, Modal, Input, Field } from "@/components/ui-kit";
 import { adminService } from "@/services/adminService";
 import { gymService, type GymCenter } from "@/services/gymService";
 import { subscriptionService } from "@/services/subscriptionService";
+import { profileService } from "@/services/profileService";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — FitX" }] }),
