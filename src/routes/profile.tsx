@@ -35,11 +35,29 @@ function ProfilePage() {
     });
   }, [profile?.id]);
 
+  useEffect(() => {
+    if (!profile?.id) return;
+    gymService.myRegistrations(profile.id).then((r) => {
+      setGymMember(r.some((x: any) => x.status === "approved"));
+    });
+  }, [profile?.id]);
+
   const initials = (profile?.name || profile?.email || "U").split(" ").map((s) => s[0]).join("").slice(0, 2).toUpperCase();
 
   async function onSignOut() {
     await signOut();
     router.navigate({ to: "/login" });
+  }
+
+  async function onResendEmail() {
+    if (!profile?.email) return;
+    setResending(true); setResendMsg(null);
+    try {
+      await authService.resendVerification(profile.email);
+      setResendMsg("Verification email sent. Check your inbox.");
+    } catch (e: any) {
+      setResendMsg(e.message ?? "Could not resend verification email.");
+    } finally { setResending(false); }
   }
 
   return (
