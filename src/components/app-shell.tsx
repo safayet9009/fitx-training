@@ -77,6 +77,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const isPublic = PUBLIC_PATHS.has(pathname);
 
+  const isAdminArea = pathname.startsWith("/admin") && pathname !== "/admin/login";
+
   // Auth gate
   useEffect(() => {
     if (loading) return;
@@ -84,10 +86,25 @@ export function AppShell({ children }: { children: ReactNode }) {
       router.navigate({ to: "/login" });
     } else if (session && (pathname === "/login" || pathname === "/signup")) {
       router.navigate({ to: "/home" });
-    } else if (pathname === "/admin" && session && !isAdmin) {
+    } else if (isAdminArea && session && !isAdmin) {
       router.navigate({ to: "/home" });
+    } else if (isAdminArea && session && isAdmin && !adminSecurity.isPinSessionValid()) {
+      router.navigate({ to: "/admin/login" });
     }
-  }, [session, loading, isPublic, pathname, isAdmin, router]);
+  }, [session, loading, isPublic, pathname, isAdmin, router, isAdminArea]);
+
+  // Admin idle auto-logout (30m, 60s warning)
+  const { warning, remainingMs, stayActive } = useIdleTimeout({
+    idleMs: 30 * 60 * 1000,
+    warningMs: 60 * 1000,
+    enabled: !!session && isAdmin && isAdminArea,
+    onTimeout: async () => {
+      adminSecurity.clearPinSession();
+      await adminSecurity.log("admin.session.timeout");
+      await supabase.auth.signOut();
+      router.navigate({ to: "/admin/login" });
+    },
+  });
 
   if (isPublic) return <>{children}</>;
 
