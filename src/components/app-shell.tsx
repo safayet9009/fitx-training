@@ -6,8 +6,12 @@ import {
 } from "lucide-react";
 import { useUser } from "@/lib/user-context";
 import { Footer } from "@/components/footer";
+import { adminSecurity } from "@/lib/admin-security";
+import { useIdleTimeout } from "@/hooks/use-idle-timeout";
+import { supabase } from "@/integrations/supabase/client";
+import { Modal, Button } from "@/components/ui-kit";
 
-const PUBLIC_PATHS = new Set(["/", "/login", "/signup", "/reset-password", "/admin-recovery"]);
+const PUBLIC_PATHS = new Set(["/", "/login", "/signup", "/reset-password", "/admin/login"]);
 
 const nav = [
   { to: "/home", label: "Dashboard", icon: LayoutDashboard, admin: false },
