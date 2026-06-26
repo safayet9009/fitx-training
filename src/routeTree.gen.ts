@@ -21,7 +21,6 @@ import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as CentersRouteImport } from './routes/centers'
 import { Route as AiCoachRouteImport } from './routes/ai-coach'
-import { Route as AdminRecoveryRouteImport } from './routes/admin-recovery'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ActivitiesRouteImport } from './routes/activities'
 import { Route as IndexRouteImport } from './routes/index'
@@ -86,11 +85,6 @@ const AiCoachRoute = AiCoachRouteImport.update({
   path: '/ai-coach',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRecoveryRoute = AdminRecoveryRouteImport.update({
-  id: '/admin-recovery',
-  path: '/admin-recovery',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -111,7 +105,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/activities': typeof ActivitiesRoute
   '/admin': typeof AdminRoute
-  '/admin-recovery': typeof AdminRecoveryRoute
   '/ai-coach': typeof AiCoachRoute
   '/centers': typeof CentersRoute
   '/home': typeof HomeRoute
@@ -129,7 +122,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activities': typeof ActivitiesRoute
   '/admin': typeof AdminRoute
-  '/admin-recovery': typeof AdminRecoveryRoute
   '/ai-coach': typeof AiCoachRoute
   '/centers': typeof CentersRoute
   '/home': typeof HomeRoute
@@ -148,7 +140,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/activities': typeof ActivitiesRoute
   '/admin': typeof AdminRoute
-  '/admin-recovery': typeof AdminRecoveryRoute
   '/ai-coach': typeof AiCoachRoute
   '/centers': typeof CentersRoute
   '/home': typeof HomeRoute
@@ -168,7 +159,6 @@ export interface FileRouteTypes {
     | '/'
     | '/activities'
     | '/admin'
-    | '/admin-recovery'
     | '/ai-coach'
     | '/centers'
     | '/home'
@@ -186,7 +176,6 @@ export interface FileRouteTypes {
     | '/'
     | '/activities'
     | '/admin'
-    | '/admin-recovery'
     | '/ai-coach'
     | '/centers'
     | '/home'
@@ -204,7 +193,6 @@ export interface FileRouteTypes {
     | '/'
     | '/activities'
     | '/admin'
-    | '/admin-recovery'
     | '/ai-coach'
     | '/centers'
     | '/home'
@@ -223,7 +211,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActivitiesRoute: typeof ActivitiesRoute
   AdminRoute: typeof AdminRoute
-  AdminRecoveryRoute: typeof AdminRecoveryRoute
   AiCoachRoute: typeof AiCoachRoute
   CentersRoute: typeof CentersRoute
   HomeRoute: typeof HomeRoute
@@ -324,13 +311,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AiCoachRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin-recovery': {
-      id: '/admin-recovery'
-      path: '/admin-recovery'
-      fullPath: '/admin-recovery'
-      preLoaderRoute: typeof AdminRecoveryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -359,7 +339,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivitiesRoute: ActivitiesRoute,
   AdminRoute: AdminRoute,
-  AdminRecoveryRoute: AdminRecoveryRoute,
   AiCoachRoute: AiCoachRoute,
   CentersRoute: CentersRoute,
   HomeRoute: HomeRoute,
