@@ -1,25 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Users, Building2, CreditCard, BarChart3, Shield, Check, X, Trash2, Mail, Phone } from "lucide-react";
+import { Users, Building2, CreditCard, BarChart3, Shield, Check, X, Trash2, Mail, Phone, KeyRound, Activity } from "lucide-react";
 import { PageHeader, Tabs, StatCard, Button, Badge, Modal, Input, Field } from "@/components/ui-kit";
 import { adminService } from "@/services/adminService";
 import { gymService, type GymCenter } from "@/services/gymService";
 import { subscriptionService } from "@/services/subscriptionService";
 import { profileService } from "@/services/profileService";
+import { adminSecurity } from "@/lib/admin-security";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — FitX" }] }),
   component: AdminPage,
 });
 
-type Tab = "analytics" | "users" | "gyms" | "registrations" | "payments" | "verification";
+type Tab = "analytics" | "users" | "gyms" | "registrations" | "payments" | "verification" | "security";
 
 function AdminPage() {
   const [tab, setTab] = useState<Tab>("analytics");
   return (
     <div className="space-y-6">
       <PageHeader title="Admin Console"
-        subtitle={<span className="inline-flex items-center gap-2"><Shield className="size-4 neon-text-green" /> Restricted to staff</span>} />
+        subtitle={<span className="inline-flex items-center gap-2"><Shield className="size-4 neon-text-green" /> Restricted to staff · PIN-verified session</span>} />
       <Tabs<Tab>
         tabs={[
           { id: "analytics", label: "Analytics", icon: <BarChart3 className="size-4" /> },
@@ -28,6 +29,7 @@ function AdminPage() {
           { id: "gyms",      label: "Gyms",      icon: <Building2 className="size-4" /> },
           { id: "registrations", label: "Registrations", icon: <Check className="size-4" /> },
           { id: "payments",  label: "Payments",  icon: <CreditCard className="size-4" /> },
+          { id: "security",  label: "Security",  icon: <KeyRound className="size-4" /> },
         ]}
         value={tab} onChange={setTab}
       />
@@ -37,6 +39,77 @@ function AdminPage() {
       {tab === "gyms" && <GymsTab />}
       {tab === "registrations" && <RegistrationsTab />}
       {tab === "payments" && <PaymentsTab />}
+      {tab === "security" && <SecurityTab />}
+    </div>
+  );
+}
+
+function SecurityTab() {
+  const [logs, setLogs] = useState<any[]>([]);
+  const [pin, setPin] = useState("");
+  const [pin2, setPin2] = useState("");
+  const [msg, setMsg] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function load() {
+    try { setLogs(await adminSecurity.recentLogs(100)); } catch {}
+  }
+  useEffect(() => { load(); }, []);
+
+  async function changePin(e: React.FormEvent) {
+    e.preventDefault();
+    setErr(null); setMsg(null);
+    if (pin !== pin2) { setErr("PINs do not match"); return; }
+    setBusy(true);
+    try {
+      await adminSecurity.setPin(pin);
+      await adminSecurity.log("admin.pin.changed");
+      setMsg("PIN updated."); setPin(""); setPin2(""); load();
+    } catch (e: any) { setErr(e.message ?? "Failed"); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-3">
+      <div className="glass p-5 space-y-4 lg:col-span-1">
+        <div className="flex items-center gap-2 font-semibold"><KeyRound className="size-4 neon-text-green" /> Change security PIN</div>
+        <form onSubmit={changePin} className="space-y-3">
+          <Field label="New 6-digit PIN"><Input inputMode="numeric" maxLength={6} value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))} placeholder="••••••" /></Field>
+          <Field label="Confirm"><Input inputMode="numeric" maxLength={6} value={pin2} onChange={(e) => setPin2(e.target.value.replace(/\D/g, ""))} placeholder="••••••" /></Field>
+          {err && <div className="text-sm text-red-300">{err}</div>}
+          {msg && <div className="text-sm neon-text-green">{msg}</div>}
+          <Button type="submit" disabled={busy || pin.length !== 6}>Update PIN</Button>
+        </form>
+        <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-xs text-muted-foreground">
+          PINs are stored hashed (bcrypt) in <code>admin_pins</code>. Required after every admin sign-in and for sensitive actions.
+        </div>
+      </div>
+
+      <div className="glass p-5 lg:col-span-2 space-y-3">
+        <div className="flex items-center gap-2 font-semibold"><Activity className="size-4 neon-text-blue" /> Recent admin activity</div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
+              <tr><th className="py-2 pr-3">When</th><th className="py-2 pr-3">Action</th><th className="py-2 pr-3">Target</th><th className="py-2 pr-3">Status</th><th className="py-2 pr-3">Browser</th></tr>
+            </thead>
+            <tbody>
+              {logs.length === 0 && <tr><td colSpan={5} className="py-6 text-center text-muted-foreground">No activity yet.</td></tr>}
+              {logs.map((l) => (
+                <tr key={l.id} className="border-t border-white/5">
+                  <td className="py-2 pr-3 whitespace-nowrap">{new Date(l.created_at).toLocaleString()}</td>
+                  <td className="py-2 pr-3 font-mono text-xs">{l.action}</td>
+                  <td className="py-2 pr-3 text-muted-foreground">{l.target ?? "—"}</td>
+                  <td className="py-2 pr-3">
+                    <Badge tone={l.status === "success" ? "green" : "red"}>{l.status}</Badge>
+                  </td>
+                  <td className="py-2 pr-3 max-w-[280px] truncate text-xs text-muted-foreground">{l.browser ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

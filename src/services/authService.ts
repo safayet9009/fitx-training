@@ -34,6 +34,10 @@ export const authService = {
   },
 
   async signOut() {
+    try {
+      const mod = await import("@/lib/admin-security");
+      mod.adminSecurity.clearPinSession();
+    } catch {}
     await supabase.auth.signOut();
   },
 

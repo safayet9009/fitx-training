@@ -6,8 +6,12 @@ import {
 } from "lucide-react";
 import { useUser } from "@/lib/user-context";
 import { Footer } from "@/components/footer";
+import { adminSecurity } from "@/lib/admin-security";
+import { useIdleTimeout } from "@/hooks/use-idle-timeout";
+import { supabase } from "@/integrations/supabase/client";
+import { Modal, Button } from "@/components/ui-kit";
 
-const PUBLIC_PATHS = new Set(["/", "/login", "/signup", "/reset-password", "/admin-recovery"]);
+const PUBLIC_PATHS = new Set(["/", "/login", "/signup", "/reset-password", "/admin/login"]);
 
 const nav = [
   { to: "/home", label: "Dashboard", icon: LayoutDashboard, admin: false },
@@ -73,6 +77,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const isPublic = PUBLIC_PATHS.has(pathname);
 
+  const isAdminArea = pathname.startsWith("/admin") && pathname !== "/admin/login";
+
   // Auth gate
   useEffect(() => {
     if (loading) return;
@@ -80,10 +86,25 @@ export function AppShell({ children }: { children: ReactNode }) {
       router.navigate({ to: "/login" });
     } else if (session && (pathname === "/login" || pathname === "/signup")) {
       router.navigate({ to: "/home" });
-    } else if (pathname === "/admin" && session && !isAdmin) {
+    } else if (isAdminArea && session && !isAdmin) {
       router.navigate({ to: "/home" });
+    } else if (isAdminArea && session && isAdmin && !adminSecurity.isPinSessionValid()) {
+      router.navigate({ to: "/admin/login" });
     }
-  }, [session, loading, isPublic, pathname, isAdmin, router]);
+  }, [session, loading, isPublic, pathname, isAdmin, router, isAdminArea]);
+
+  // Admin idle auto-logout (30m, 60s warning)
+  const { warning, remainingMs, stayActive } = useIdleTimeout({
+    idleMs: 30 * 60 * 1000,
+    warningMs: 60 * 1000,
+    enabled: !!session && isAdmin && isAdminArea,
+    onTimeout: async () => {
+      adminSecurity.clearPinSession();
+      await adminSecurity.log("admin.session.timeout");
+      await supabase.auth.signOut();
+      router.navigate({ to: "/admin/login" });
+    },
+  });
 
   if (isPublic) return <>{children}</>;
 
@@ -182,6 +203,20 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8">{children}</main>
         <Footer />
       </div>
+
+      <Modal open={warning} onClose={stayActive} title="Session about to expire">
+        <p className="text-sm text-muted-foreground">
+          For security, your admin session will end in {Math.max(0, Math.ceil(remainingMs / 1000))}s due to inactivity.
+        </p>
+        <div className="mt-4 flex justify-end gap-2">
+          <Button variant="ghost" onClick={async () => {
+            adminSecurity.clearPinSession();
+            await supabase.auth.signOut();
+            router.navigate({ to: "/admin/login" });
+          }}>Sign out now</Button>
+          <Button onClick={stayActive}>Stay signed in</Button>
+        </div>
+      </Modal>
     </div>
   );
 }
