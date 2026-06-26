@@ -38,14 +38,14 @@ export const adminSecurity = {
   },
   async log(action: string, target?: string, status: "success" | "failure" = "success", metadata?: Record<string, unknown>) {
     try {
-      const browser = typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 200) : null;
+      const browser = typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 200) : undefined;
       await supabase.rpc("log_admin_action", {
         _action: action,
-        _target: target ?? null,
+        _target: target ?? undefined,
         _status: status,
         _browser: browser,
-        _ip: null,
-        _metadata: metadata ? (metadata as any) : null,
+        _ip: undefined,
+        _metadata: metadata as any,
       });
     } catch {
       // logging must never break the action

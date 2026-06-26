@@ -24,6 +24,7 @@ import { Route as AiCoachRouteImport } from './routes/ai-coach'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ActivitiesRouteImport } from './routes/activities'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
 const WorkoutRoute = WorkoutRouteImport.update({
   id: '/workout',
@@ -100,11 +101,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/activities': typeof ActivitiesRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/ai-coach': typeof AiCoachRoute
   '/centers': typeof CentersRoute
   '/home': typeof HomeRoute
@@ -117,11 +123,12 @@ export interface FileRoutesByFullPath {
   '/subscription': typeof SubscriptionRoute
   '/verify-phone': typeof VerifyPhoneRoute
   '/workout': typeof WorkoutRoute
+  '/admin/login': typeof AdminLoginRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activities': typeof ActivitiesRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/ai-coach': typeof AiCoachRoute
   '/centers': typeof CentersRoute
   '/home': typeof HomeRoute
@@ -134,12 +141,13 @@ export interface FileRoutesByTo {
   '/subscription': typeof SubscriptionRoute
   '/verify-phone': typeof VerifyPhoneRoute
   '/workout': typeof WorkoutRoute
+  '/admin/login': typeof AdminLoginRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/activities': typeof ActivitiesRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/ai-coach': typeof AiCoachRoute
   '/centers': typeof CentersRoute
   '/home': typeof HomeRoute
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/subscription': typeof SubscriptionRoute
   '/verify-phone': typeof VerifyPhoneRoute
   '/workout': typeof WorkoutRoute
+  '/admin/login': typeof AdminLoginRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/verify-phone'
     | '/workout'
+    | '/admin/login'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/verify-phone'
     | '/workout'
+    | '/admin/login'
   id:
     | '__root__'
     | '/'
@@ -205,12 +216,13 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/verify-phone'
     | '/workout'
+    | '/admin/login'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActivitiesRoute: typeof ActivitiesRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AiCoachRoute: typeof AiCoachRoute
   CentersRoute: typeof CentersRoute
   HomeRoute: typeof HomeRoute
@@ -332,13 +344,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminLoginRoute: typeof AdminLoginRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminLoginRoute: AdminLoginRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivitiesRoute: ActivitiesRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   AiCoachRoute: AiCoachRoute,
   CentersRoute: CentersRoute,
   HomeRoute: HomeRoute,
