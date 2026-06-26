@@ -203,6 +203,20 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8">{children}</main>
         <Footer />
       </div>
+
+      <Modal open={warning} onClose={stayActive} title="Session about to expire">
+        <p className="text-sm text-muted-foreground">
+          For security, your admin session will end in {Math.max(0, Math.ceil(remainingMs / 1000))}s due to inactivity.
+        </p>
+        <div className="mt-4 flex justify-end gap-2">
+          <Button variant="ghost" onClick={async () => {
+            adminSecurity.clearPinSession();
+            await supabase.auth.signOut();
+            router.navigate({ to: "/admin/login" });
+          }}>Sign out now</Button>
+          <Button onClick={stayActive}>Stay signed in</Button>
+        </div>
+      </Modal>
     </div>
   );
 }
