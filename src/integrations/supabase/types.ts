@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_logs: {
+        Row: {
+          action: string
+          admin_id: string
+          browser: string | null
+          created_at: string
+          id: string
+          ip: string | null
+          metadata: Json | null
+          status: string
+          target: string | null
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          browser?: string | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          metadata?: Json | null
+          status?: string
+          target?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          browser?: string | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          metadata?: Json | null
+          status?: string
+          target?: string | null
+        }
+        Relationships: []
+      }
+      admin_pins: {
+        Row: {
+          created_at: string
+          pin_hash: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          pin_hash: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          pin_hash?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           code: string
@@ -49,8 +106,11 @@ export type Database = {
           address: string
           city: string
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           facilities: string[]
           id: string
+          is_deleted: boolean
           monthly_fee: number
           name: string
           phone: string | null
@@ -59,8 +119,11 @@ export type Database = {
           address: string
           city: string
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           facilities?: string[]
           id?: string
+          is_deleted?: boolean
           monthly_fee: number
           name: string
           phone?: string | null
@@ -69,8 +132,11 @@ export type Database = {
           address?: string
           city?: string
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           facilities?: string[]
           id?: string
+          is_deleted?: boolean
           monthly_fee?: number
           name?: string
           phone?: string | null
@@ -82,7 +148,10 @@ export type Database = {
           amount: number | null
           center_id: string
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           id: string
+          is_deleted: boolean
           payment_method: string | null
           plan: string | null
           processed_at: string | null
@@ -95,7 +164,10 @@ export type Database = {
           amount?: number | null
           center_id: string
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
+          is_deleted?: boolean
           payment_method?: string | null
           plan?: string | null
           processed_at?: string | null
@@ -108,7 +180,10 @@ export type Database = {
           amount?: number | null
           center_id?: string
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
+          is_deleted?: boolean
           payment_method?: string | null
           plan?: string | null
           processed_at?: string | null
@@ -188,8 +263,11 @@ export type Database = {
         Row: {
           amount: number | null
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           expires_at: string
           id: string
+          is_deleted: boolean
           payment_method: Database["public"]["Enums"]["payment_method"] | null
           plan: Database["public"]["Enums"]["subscription_plan"]
           sender_number: string | null
@@ -201,8 +279,11 @@ export type Database = {
         Insert: {
           amount?: number | null
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           expires_at: string
           id?: string
+          is_deleted?: boolean
           payment_method?: Database["public"]["Enums"]["payment_method"] | null
           plan: Database["public"]["Enums"]["subscription_plan"]
           sender_number?: string | null
@@ -214,8 +295,11 @@ export type Database = {
         Update: {
           amount?: number | null
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           expires_at?: string
           id?: string
+          is_deleted?: boolean
           payment_method?: Database["public"]["Enums"]["payment_method"] | null
           plan?: Database["public"]["Enums"]["subscription_plan"]
           sender_number?: string | null
@@ -317,6 +401,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_has_pin: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -324,6 +409,19 @@ export type Database = {
         }
         Returns: boolean
       }
+      log_admin_action: {
+        Args: {
+          _action: string
+          _browser?: string
+          _ip?: string
+          _metadata?: Json
+          _status?: string
+          _target?: string
+        }
+        Returns: undefined
+      }
+      set_admin_pin: { Args: { _pin: string }; Returns: undefined }
+      verify_admin_pin: { Args: { _pin: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user"
